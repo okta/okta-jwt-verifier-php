@@ -1,4 +1,4 @@
-#Okta JWT Verifier for PHP
+# Okta JWT Verifier for PHP
 
 ## Usage
 

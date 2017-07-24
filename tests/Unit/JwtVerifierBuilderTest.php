@@ -50,7 +50,7 @@ class JwtVerifierBuilderTest extends BaseTestCase
     }
 
     /** @test */
-    public function discovery_defaults_to_oauth2_when_building()
+    public function discovery_defaults_to_oidc_when_building()
     {
         $this->response
             ->method('getBody')
@@ -62,10 +62,11 @@ class JwtVerifierBuilderTest extends BaseTestCase
         $request = new \Okta\JwtVerifier\Request($httpClient);
 
         $verifier = new JwtVerifierBuilder($request);
-        $verifier = $verifier->setIssuer('https://my.issuer.com')->build();
+        $verifier = $verifier->setIssuer('https://my.issuer.com')
+            ->setAdaptor(new \Okta\JwtVerifier\Adaptors\SpomkyLabsJose())->build();
 
         $this->assertInstanceOf(
-            \Okta\JwtVerifier\Discovery\Oauth::class,
+            \Okta\JwtVerifier\Discovery\Oidc::class,
             $verifier->getDiscovery(),
             'The builder is not defaulting to oauth2 discovery'
         );
@@ -84,7 +85,8 @@ class JwtVerifierBuilderTest extends BaseTestCase
         $request = new \Okta\JwtVerifier\Request($httpClient);
 
         $verifier = new JwtVerifierBuilder($request);
-        $verifier = $verifier->setIssuer('https://my.issuer.com')->build();
+        $verifier = $verifier->setIssuer('https://my.issuer.com')
+            ->setAdaptor(new \Okta\JwtVerifier\Adaptors\SpomkyLabsJose())->build();
 
         $this->assertInstanceOf(
             \Okta\JwtVerifier\JwtVerifier::class,

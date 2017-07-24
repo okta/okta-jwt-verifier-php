@@ -15,19 +15,28 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-use PHPUnit\Framework\TestCase;
+namespace Okta\JwtVerifier\Adaptors;
 
-class BaseTestCase extends TestCase
+use Jose\Loader;
+use Okta\JwtVerifier\Jwt;
+
+class SpomkyLabsJose implements Adaptor
 {
-    /**
-     * @var PHPUnit_Framework_MockObject_MockObject
-     */
-    protected $response;
-
-    public function setUp()
+    public function getKeys($jku)
     {
-        parent::setUp();
+        return \Jose\Factory\JWKFactory::createFromJKU($jku);
+    }
 
-        $this->response = self::createMock('Psr\Http\Message\ResponseInterface');
+    public function decode($jwt, $keys): Jwt
+    {
+        $decoded = (new Loader())
+            ->loadAndVerifySignatureUsingKeySet(
+                $jwt,
+                $keys,
+                ['RS256'],
+                $signature_index
+            );
+
+        return (new Jwt($jwt, $decoded->getPayload()));
     }
 }

@@ -17,38 +17,38 @@
 
 namespace Okta\JwtVerifier;
 
+use Http\Client\Common\PluginClient;
+use Http\Client\HttpClient;
+use Http\Discovery\HttpClientDiscovery;
+use Http\Discovery\MessageFactoryDiscovery;
+use Http\Discovery\UriFactoryDiscovery;
+use Okta\JwtVerifier\Adaptors\Adaptor;
+use Okta\JwtVerifier\Discovery\DiscoveryMethod;
+
 class JwtVerifier
 {
+    /**
+     * @var string
+     */
     protected $issuer;
+
+    /**
+     * @var DiscoveryMethod
+     */
     protected $discovery;
-    protected $wellKnown;
 
     public function __construct(
         string $issuer,
-        string $discovery
-    )
-    {
+        DiscoveryMethod $discovery,
+        Adaptor $adaptor,
+        Request $request = null
+    ) {
         $this->issuer = $issuer;
         $this->discovery = $discovery;
-        $this->wellKnown = $this->buildWellKnownEndpoint();
-    }
-
-    private function buildWellKnownEndpoint()
-    {
-        switch ($this->discovery) {
-            case 'oidc':
-                return $this->issuer . '/.well-known/openid-configuration';
-            case 'oauth2':
-            case 'oauth':
-                return $this->issuer . '/.well-known/oauth-authorization-server';
-            default:
-                throw new \InvalidArgumentException('Please provide a discovery method.');
-        }
-    }
-
-    public function getWellKnown()
-    {
-        return $this->wellKnown;
+        $this->adaptor = $adaptor;
+        $request = $request ?: new Request;
+        $this->metaData = json_decode($request->setUrl($this->issuer.$this->discovery->getWellKnown())->get()
+            ->getBody());
     }
 
     public function getIssuer()
@@ -59,5 +59,16 @@ class JwtVerifier
     public function getDiscovery()
     {
         return $this->discovery;
+    }
+
+    public function getMetaData()
+    {
+        return $this->metaData;
+    }
+
+    public function verify($jwt)
+    {
+        $keys = $this->adaptor->getKeys($this->metaData->jwks_uri);
+        return $this->adaptor->decode($jwt, $keys);
     }
 }

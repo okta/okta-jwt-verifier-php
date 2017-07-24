@@ -15,19 +15,20 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-use PHPUnit\Framework\TestCase;
+use Okta\JwtVerifier\Discovery\Oauth;
 
-class BaseTestCase extends TestCase
+class OauthTest extends BaseTestCase
 {
-    /**
-     * @var PHPUnit_Framework_MockObject_MockObject
-     */
-    protected $response;
-
-    public function setUp()
+    /** @test */
+    public function sets_well_known_correctly()
     {
-        parent::setUp();
+        $oauth = new Oauth();
 
-        $this->response = self::createMock('Psr\Http\Message\ResponseInterface');
+        $this->assertEquals(
+            '/.well-known/oauth-authorization-server',
+            $oauth->getWellKnownUri(),
+            '.well-known endpoint is not set correctly'
+        );
     }
+
 }

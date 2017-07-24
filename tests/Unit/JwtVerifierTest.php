@@ -18,52 +18,26 @@
 use Okta\JwtVerifier\JwtVerifier;
 use PHPUnit\Framework\TestCase;
 
-class JwtVerifierTest extends TestCase
+class JwtVerifierTest extends BaseTestCase
 {
-    /** @test */
-    public function it_throws_exception_if_discovery_is_not_valid()
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        new JwtVerifier('https://my.issuer.com', 'something');
-    }
-
-    /** @test */
-    public function it_creates_oauth_well_known_correctly()
-    {
-        $verifier = new JwtVerifier('https://my.issuer.com', 'oauth');
-
-        $this->assertEquals(
-            'https://my.issuer.com/.well-known/oauth-authorization-server',
-            $verifier->getWellKnown(),
-            'Well known endpoint was not generated correctly.'
-        );
-
-        $verifier = new JwtVerifier('https://my.issuer.com', 'oauth2');
-
-        $this->assertEquals(
-            'https://my.issuer.com/.well-known/oauth-authorization-server',
-            $verifier->getWellKnown(),
-            'Well known endpoint was not generated correctly.'
-        );
-    }
-
-    /** @test */
-    public function it_creates_oidc_well_known_correctly()
-    {
-        $verifier = new JwtVerifier('https://my.issuer.com', 'oidc');
-
-        $this->assertEquals(
-            'https://my.issuer.com/.well-known/openid-configuration',
-            $verifier->getWellKnown(),
-            'Well known endpoint was not generated correctly.'
-        );
-
-    }
-
     /** @test */
     public function can_get_issuer_off_object()
     {
-        $verifier = new JwtVerifier('https://my.issuer.com', 'oidc');
+        $this->response
+            ->method('getBody')
+            ->willreturn('{"issuer": "https://example.com"}');
+
+
+        $httpClient = new \Http\Mock\Client;
+        $httpClient->addResponse($this->response);
+        $request = new \Okta\JwtVerifier\Request($httpClient);
+
+        $verifier = new JwtVerifier(
+            'https://my.issuer.com',
+            new \Okta\JwtVerifier\Discovery\Oauth(),
+            $request
+        );
+
         $this->assertEquals(
             'https://my.issuer.com',
             $verifier->getIssuer(),
@@ -74,12 +48,55 @@ class JwtVerifierTest extends TestCase
     /** @test */
     public function can_get_discovery_off_object()
     {
-        $verifier = new JwtVerifier('https://my.issuer.com', 'oidc');
-        $this->assertEquals(
-            'oidc',
+        $this->response
+            ->method('getBody')
+            ->willreturn('{"issuer": "https://example.com"}');
+
+
+        $httpClient = new \Http\Mock\Client;
+        $httpClient->addResponse($this->response);
+        $request = new \Okta\JwtVerifier\Request($httpClient);
+
+        $verifier = new JwtVerifier(
+            'https://my.issuer.com',
+            new \Okta\JwtVerifier\Discovery\Oauth(),
+            $request
+        );
+
+        $this->assertInstanceOf(
+            \Okta\JwtVerifier\Discovery\Oauth::class,
             $verifier->getDiscovery(),
             'Does not return discovery correctly'
         );
     }
+
+    /** @test */
+    public function will_get_meta_data_when_verifier_is_constructed()
+    {
+        $this->response
+            ->method('getBody')
+            ->willreturn('{"issuer": "https://example.com"}');
+
+
+        $httpClient = new \Http\Mock\Client;
+        $httpClient->addResponse($this->response);
+        $request = new \Okta\JwtVerifier\Request($httpClient);
+
+        $verifier = new JwtVerifier(
+            'https://my.issuer.com',
+            new \Okta\JwtVerifier\Discovery\Oauth(),
+            $request
+        );
+
+        $metaData = $verifier->getMetaData();
+
+        $this->assertEquals(
+            'https://example.com',
+            $metaData->issuer,
+            'Metadata was not accessed.'
+        );
+
+    }
+
 
 }

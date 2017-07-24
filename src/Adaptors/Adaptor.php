@@ -15,19 +15,12 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-use PHPUnit\Framework\TestCase;
+namespace Okta\JwtVerifier\Adaptors;
 
-class BaseTestCase extends TestCase
+use Okta\JwtVerifier\Jwt;
+
+interface Adaptor
 {
-    /**
-     * @var PHPUnit_Framework_MockObject_MockObject
-     */
-    protected $response;
-
-    public function setUp()
-    {
-        parent::setUp();
-
-        $this->response = self::createMock('Psr\Http\Message\ResponseInterface');
-    }
+    public function getKeys($jku);
+    public function decode($jwt, $keys): Jwt;
 }

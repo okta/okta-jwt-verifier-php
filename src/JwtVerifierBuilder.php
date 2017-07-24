@@ -17,10 +17,24 @@
 
 namespace Okta\JwtVerifier;
 
+use Http\Client\HttpClient;
+use Okta\JwtVerifier\Adaptors\Adaptor;
+use Okta\JwtVerifier\Discovery\DiscoveryMethod;
+use Okta\JwtVerifier\Discovery\Oauth;
+use Okta\JwtVerifier\Discovery\Oidc;
+
 class JwtVerifierBuilder
 {
     protected $issuer;
-    protected $discovery = 'oauth2';
+    protected $discovery;
+    protected $request;
+    protected $adaptor;
+
+    public function __construct(Request $request = null)
+    {
+        $this->setDiscovery(new Oidc());
+        $this->request = $request;
+    }
 
     /**
      * Sets the issuer URI.
@@ -36,15 +50,21 @@ class JwtVerifierBuilder
     }
 
     /**
-     * Set the Discovery type. This will set the .well-known endpoint based on
-     * the type and the issuer that is used.
+     * Set the Discovery class. This class should be an instance of DiscoveryMethod.
      *
-     * @param string $type The type of discovery.
+     * @param DiscoveryMethod $discoveryMethod The DiscoveryMethod instance.
      * @return JwtVerifierBuilder
      */
-    public function setDiscovery(string $type = 'oauth2'): self
+    public function setDiscovery(DiscoveryMethod $discoveryMethod): self
     {
-        $this->discovery = $type;
+        $this->discovery = $discoveryMethod;
+
+        return $this;
+    }
+
+    public function setAdaptor(Adaptor $adaptor): self
+    {
+        $this->adaptor = $adaptor;
 
         return $this;
     }
@@ -63,7 +83,9 @@ class JwtVerifierBuilder
 
         return new JwtVerifier(
             $this->issuer,
-            $this->discovery
+            $this->discovery,
+            $this->adaptor,
+            $this->request
         );
     }
 }

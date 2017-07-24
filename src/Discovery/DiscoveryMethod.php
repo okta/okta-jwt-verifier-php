@@ -15,19 +15,15 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-use PHPUnit\Framework\TestCase;
+namespace Okta\JwtVerifier\Discovery;
 
-class BaseTestCase extends TestCase
+
+abstract class DiscoveryMethod
 {
-    /**
-     * @var PHPUnit_Framework_MockObject_MockObject
-     */
-    protected $response;
+    protected $wellKnownUri;
 
-    public function setUp()
+    public function getWellKnown()
     {
-        parent::setUp();
-
-        $this->response = self::createMock('Psr\Http\Message\ResponseInterface');
+        return $this->wellKnownUri;
     }
 }

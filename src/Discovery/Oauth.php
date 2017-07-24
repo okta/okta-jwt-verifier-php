@@ -15,19 +15,24 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-use PHPUnit\Framework\TestCase;
+namespace Okta\JwtVerifier\Discovery;
 
-class BaseTestCase extends TestCase
+use Okta\JwtVerifier\Discovery\DiscoveryMethod as Discovery;
+
+class Oauth extends Discovery
 {
+
+    protected $wellKnownUri = '/.well-known/oauth-authorization-server';
+
     /**
-     * @var PHPUnit_Framework_MockObject_MockObject
+     * Get the defined well-known URI.  This is the URI
+     * that is concatenated to the issuer URL.
+     *
+     * @return string
      */
-    protected $response;
-
-    public function setUp()
+    public function getWellKnownUri(): string
     {
-        parent::setUp();
-
-        $this->response = self::createMock('Psr\Http\Message\ResponseInterface');
+        return $this->wellKnownUri;
     }
+
 }

@@ -15,8 +15,57 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-namespace Okta\JwtVerifier\Contracts;
+namespace Okta\JwtVerifier;
 
-interface JwtAdaptor
+class Jwt
 {
+    public function __construct(
+        string $jwt,
+        array $claims
+    )
+    {
+        $this->jwt = $jwt;
+        $this->claims = $claims;
+    }
+
+    public function getJwt()
+    {
+        return $this->jwt;
+    }
+
+    public function getClaims()
+    {
+        return $this->claims;
+    }
+
+    public function getExpirationTime($carbonInstance = true)
+    {
+        $ts = $this->toJson()->exp;
+        if(class_exists(\Carbon\Carbon::class) && $carbonInstance) {
+            return \Carbon\Carbon::createFromTimestampUTC($ts);
+        }
+
+        return $ts;
+    }
+
+    public function getIssuedAt($carbonInstance = true)
+    {
+        $ts = $this->toJson()->iat;
+        if(class_exists(\Carbon\Carbon::class) && $carbonInstance) {
+            return \Carbon\Carbon::createFromTimestampUTC($ts);
+        }
+
+        return $ts;
+    }
+
+    public function toJson()
+    {
+        if(is_resource($this->claims)) {
+            throw new \InvalidArgumentException('Could not convert to JSON');
+        }
+
+        return json_decode(json_encode($this->claims));
+
+    }
+
 }

@@ -36,7 +36,7 @@ class JwtVerifierBuilderTest extends BaseTestCase
         $verifier = new JwtVerifierBuilder();
         $this->assertInstanceOf(
             JwtVerifierBuilder::class,
-            $verifier->setDiscovery('oidc'),
+            $verifier->setDiscovery(new \Okta\JwtVerifier\Discovery\Oauth()),
             'Settings discovery does not return self.'
         );
     }
@@ -52,11 +52,20 @@ class JwtVerifierBuilderTest extends BaseTestCase
     /** @test */
     public function discovery_defaults_to_oauth2_when_building()
     {
-        $verifier = new JwtVerifierBuilder();
+        $this->response
+            ->method('getBody')
+            ->willreturn('{"issuer": "https://example.com"}');
+
+
+        $httpClient = new \Http\Mock\Client;
+        $httpClient->addResponse($this->response);
+        $request = new \Okta\JwtVerifier\Request($httpClient);
+
+        $verifier = new JwtVerifierBuilder($request);
         $verifier = $verifier->setIssuer('https://my.issuer.com')->build();
 
-        $this->assertEquals(
-            'oauth2',
+        $this->assertInstanceOf(
+            \Okta\JwtVerifier\Discovery\Oauth::class,
             $verifier->getDiscovery(),
             'The builder is not defaulting to oauth2 discovery'
         );
@@ -65,7 +74,16 @@ class JwtVerifierBuilderTest extends BaseTestCase
     /** @test */
     public function building_the_verifier_returns_instance_of_jwt_verifier()
     {
-        $verifier = new JwtVerifierBuilder();
+        $this->response
+            ->method('getBody')
+            ->willreturn('{"issuer": "https://example.com"}');
+
+
+        $httpClient = new \Http\Mock\Client;
+        $httpClient->addResponse($this->response);
+        $request = new \Okta\JwtVerifier\Request($httpClient);
+
+        $verifier = new JwtVerifierBuilder($request);
         $verifier = $verifier->setIssuer('https://my.issuer.com')->build();
 
         $this->assertInstanceOf(

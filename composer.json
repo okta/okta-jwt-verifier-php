@@ -30,7 +30,8 @@
         "symfony/var-dumper": "^3.2",
         "squizlabs/php_codesniffer": "3.0.1",
         "php-http/mock-client": "^1.0",
+        "guzzlehttp/psr7": "^1.4",
         "spomky-labs/jose": "^6.1",
-        "guzzlehttp/psr7": "^1.4"
+        "firebase/php-jwt": "^5.0"
     }
 }

@@ -17,11 +17,9 @@
 
 namespace Okta\JwtVerifier;
 
-use Http\Client\HttpClient;
 use Okta\JwtVerifier\Adaptors\Adaptor;
 use Okta\JwtVerifier\Discovery\DiscoveryMethod;
 use Okta\JwtVerifier\Discovery\Oauth;
-use Okta\JwtVerifier\Discovery\Oidc;
 
 class JwtVerifierBuilder
 {
@@ -32,7 +30,7 @@ class JwtVerifierBuilder
 
     public function __construct(Request $request = null)
     {
-        $this->setDiscovery(new Oidc());
+        $this->setDiscovery(new Oauth());
         $this->request = $request;
     }
 

@@ -69,6 +69,7 @@ class JwtVerifier
     public function verify($jwt)
     {
         $keys = $this->adaptor->getKeys($this->metaData->jwks_uri);
+
         return $this->adaptor->decode($jwt, $keys);
     }
 }

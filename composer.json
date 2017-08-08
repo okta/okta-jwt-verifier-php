@@ -1,6 +1,6 @@
 {
-    "name": "okta/okta-jwt-php",
-    "description": "A helper library for working with Okta JWT's",
+    "name": "okta/jwt-verifier",
+    "description": "A verifier library for working with Okta JWT's",
     "type": "library",
     "license": "Apache-2.0",
     "authors": [

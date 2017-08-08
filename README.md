@@ -7,7 +7,7 @@
 $jwt = 'eyJhbGciOiJSUzI1Nqd0FfRzh6X0ZsOGlJRnNoUlRuQUkweVUifQ.eyJ2ZXIiOjEsiOiJwaHBAb2t0YS5jb20ifQ.ZGrn4fvIoCq0QdSyA';
 
 $jwtVerifier = (new \Okta\JwtVerifier\JwtVerifierBuilder())
-    ->setDiscovery(new \Okta\JwtVerifier\Discovery\Oauth) // This is not needed if using oauth.  other option is OIDC
+    ->setDiscovery(new \Okta\JwtVerifier\Discovery\Oauth) // This is not needed if using oauth.  The other option is OIDC
     ->setAdaptor(new \Okta\JwtVerifier\Adaptors\SpomkyLabsJose)
     ->setIssuer('https://php.oktapreview.com/oauth2/ausb5jqasde774i490h7')
     ->build();

@@ -39,4 +39,11 @@ class SpomkyLabsJose implements Adaptor
 
         return (new Jwt($jwt, $decoded->getPayload()));
     }
+
+    public static function isPackageAvailable()
+    {
+        return
+            class_exists(\Jose\Factory\JWKFactory::class) &&
+            class_exists(Loader::class);
+    }
 }

@@ -19,21 +19,21 @@ namespace Okta\JwtVerifier\Adaptors;
 
 class AutoDiscover
 {
-    private $adaptors = [
+    private static $adaptors = [
         SpomkyLabsJose::class,
         FirebasePhpJwt::class
     ];
 
-    public function __construct()
+    public static function getAdaptor()
     {
-        foreach($this->adaptors as $adaptor) {
+        foreach(self::$adaptors as $adaptor) {
             if($adaptor::isPackageAvailable()) {
                 return new $adaptor();
             }
         }
 
         throw new \Exception(
-            'Could not discover JWT Library, 
+            'Could not discover JWT Library,
             Please make sure one is included and the Adaptor is used'
         );
     }

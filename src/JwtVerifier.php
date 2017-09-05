@@ -47,7 +47,7 @@ class JwtVerifier
     ) {
         $this->issuer = $issuer;
         $this->discovery = $discovery ?: new Oauth;
-        $this->adaptor = $adaptor ?: new AutoDiscover;
+        $this->adaptor = $adaptor ?: AutoDiscover::getAdaptor();
         $request = $request ?: new Request;
         $this->metaData = json_decode($request->setUrl($this->issuer.$this->discovery->getWellKnown())->get()
             ->getBody());

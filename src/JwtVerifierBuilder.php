@@ -30,7 +30,6 @@ class JwtVerifierBuilder
 
     public function __construct(Request $request = null)
     {
-        $this->setDiscovery(new Oauth());
         $this->request = $request;
     }
 
@@ -60,12 +59,20 @@ class JwtVerifierBuilder
         return $this;
     }
 
+    /**
+     * Set the Adaptor class. This class should be an interface of Adaptor.
+     *
+     * @param Adaptor $adaptor The adaptor of the JWT library you are using.
+     * @return JwtVerifierBuilder
+     */
     public function setAdaptor(Adaptor $adaptor): self
     {
         $this->adaptor = $adaptor;
 
         return $this;
     }
+
+    
 
     /**
      * Build and return the JwtVerifier.

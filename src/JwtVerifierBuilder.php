@@ -27,10 +27,12 @@ class JwtVerifierBuilder
     protected $discovery;
     protected $request;
     protected $adaptor;
+    protected $audience;
+    protected $clientId;
+    protected $nonce;
 
     public function __construct(Request $request = null)
     {
-        $this->setDiscovery(new Oauth());
         $this->request = $request;
     }
 
@@ -60,9 +62,36 @@ class JwtVerifierBuilder
         return $this;
     }
 
+    /**
+     * Set the Adaptor class. This class should be an interface of Adaptor.
+     *
+     * @param Adaptor $adaptor The adaptor of the JWT library you are using.
+     * @return JwtVerifierBuilder
+     */
     public function setAdaptor(Adaptor $adaptor): self
     {
         $this->adaptor = $adaptor;
+
+        return $this;
+    }
+
+    public function setAudience($audience)
+    {
+        $this->audience = $audience;
+
+        return $this;
+    }
+
+    public function setClientId($clientId)
+    {
+        $this->clientId = $clientId;
+
+        return $this;
+    }
+
+    public function setNonce($nonce)
+    {
+        $this->nonce = $nonce;
 
         return $this;
     }
@@ -83,7 +112,12 @@ class JwtVerifierBuilder
             $this->issuer,
             $this->discovery,
             $this->adaptor,
-            $this->request
+            $this->request,
+            [
+                'nonce' => $this->nonce,
+                'audience' => $this->audience,
+                'clientId' => $this->clientId
+            ]
         );
     }
 }

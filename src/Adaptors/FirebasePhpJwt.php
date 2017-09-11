@@ -44,6 +44,11 @@ class FirebasePhpJwt implements Adaptor
         return (new Jwt($jwt, $decoded));
     }
 
+    public static function isPackageAvailable()
+    {
+        return class_exists(\Firebase\JWT\JWT::class);
+    }
+
     /**
      * Parse a set of JWK keys
      * @param $source

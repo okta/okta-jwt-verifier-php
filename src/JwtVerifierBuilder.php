@@ -27,6 +27,9 @@ class JwtVerifierBuilder
     protected $discovery;
     protected $request;
     protected $adaptor;
+    protected $audience;
+    protected $clientId;
+    protected $nonce;
 
     public function __construct(Request $request = null)
     {
@@ -72,7 +75,26 @@ class JwtVerifierBuilder
         return $this;
     }
 
-    
+    public function setAudience($audience)
+    {
+        $this->audience = $audience;
+
+        return $this;
+    }
+
+    public function setClientId($clientId)
+    {
+        $this->clientId = $clientId;
+
+        return $this;
+    }
+
+    public function setNonce($nonce)
+    {
+        $this->nonce = $nonce;
+
+        return $this;
+    }
 
     /**
      * Build and return the JwtVerifier.
@@ -90,7 +112,12 @@ class JwtVerifierBuilder
             $this->issuer,
             $this->discovery,
             $this->adaptor,
-            $this->request
+            $this->request,
+            [
+                'nonce' => $this->nonce,
+                'audience' => $this->audience,
+                'clientId' => $this->clientId
+            ]
         );
     }
 }

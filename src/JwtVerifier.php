@@ -39,11 +39,27 @@ class JwtVerifier
      */
     protected $discovery;
 
+    /**
+     * @var array
+     */
+    protected $claimsToValidate;
+
+    /**
+     * @var mixed
+     */
+    protected $metaData;
+
+    /**
+     * @var Adaptor
+     */
+    protected $adaptor;
+
     public function __construct(
         string $issuer,
         DiscoveryMethod $discovery = null,
         Adaptor $adaptor = null,
-        Request $request = null
+        Request $request = null,
+        array $claimsToValidate = []
     ) {
         $this->issuer = $issuer;
         $this->discovery = $discovery ?: new Oauth;
@@ -51,6 +67,7 @@ class JwtVerifier
         $request = $request ?: new Request;
         $this->metaData = json_decode($request->setUrl($this->issuer.$this->discovery->getWellKnown())->get()
             ->getBody());
+        $this->claimsToValidate = $claimsToValidate;
     }
 
     public function getIssuer()
@@ -72,6 +89,53 @@ class JwtVerifier
     {
         $keys = $this->adaptor->getKeys($this->metaData->jwks_uri);
 
-        return $this->adaptor->decode($jwt, $keys);
+        $decoded =  $this->adaptor->decode($jwt, $keys);
+
+        $this->validateClaims($decoded->getClaims());
+
+        return $decoded;
+    }
+
+    private function validateClaims(array $claims)
+    {
+        $this->validateNonce($claims);
+        $this->validateAudience($claims);
+        $this->validateClientId($claims);
+    }
+
+    private function validateNonce($claims)
+    {
+        if(!isset($claims['nonce']) && $this->claimsToValidate['nonce'] == null) {
+            return false;
+        }
+
+        if($claims['nonce'] != $this->claimsToValidate['nonce']) {
+            throw new \Exception('Nonce does not match what is expected. Make sure to provide the nonce with 
+            `setNonce()` from the JwtVerifierBuilder.');
+        }
+    }
+
+    private function validateAudience($claims)
+    {
+        if(!isset($claims['aud']) && $this->claimsToValidate['audience'] == null) {
+            return false;
+        }
+
+        if($claims['aud'] != $this->claimsToValidate['audience']) {
+            throw new \Exception('Audience does not match what is expected. Make sure to provide the audience with 
+            `setAudience()` from the JwtVerifierBuilder.');
+        }
+    }
+
+    private function validateClientId($claims)
+    {
+        if(!isset($claims['cid']) && $this->claimsToValidate['clientId'] == null) {
+            return false;
+        }
+
+        if($claims['cid'] != $this->claimsToValidate['clientId']) {
+            throw new \Exception('ClientId does not match what is expected. Make sure to provide the client id with 
+            `setClientId()` from the JwtVerifierBuilder.');
+        }
     }
 }

@@ -34,8 +34,8 @@ $jwtVerifier = (new \Okta\JwtVerifier\JwtVerifierBuilder())
     ->setDiscovery(new \Okta\JwtVerifier\Discovery\Oauth) // This is not needed if using oauth.  The other option is OIDC
     ->setAdaptor(new \Okta\JwtVerifier\Adaptors\SpomkyLabsJose)
     ->setAudience('api://default')
-    ->setClientId('{YourClientId}')
-    ->setIssuer('https://php.oktapreview.com/oauth2/default')
+    ->setClientId('{clientId}')
+    ->setIssuer('https://{yourOktaDomain}.com/oauth2/default')
     ->build();
 
 $jwt = $jwtVerifier->verify($jwt);

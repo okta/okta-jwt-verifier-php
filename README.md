@@ -1,5 +1,7 @@
 # Okta JWT Verifier for PHP
 
+This library helps you verify tokens that have been issued by Okta.  To learn more about verification cases and Okta's tokens please read [Working With OAuth 2.0 Tokens](https://developer.okta.com/authentication-guide/tokens/)
+
 ## Installation
 The Okta JWT Verifier can be installed through composer.
 

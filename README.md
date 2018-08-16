@@ -9,9 +9,9 @@ The Okta JWT Verifier can be installed through composer.
 composer require okta/jwt-verifier
 ```
 
-The library is also designed to use your favorite JWT library. We currently support 
+This library requires a JWT library. We currently support 
 [spomky-labs/jose](https://packagist.org/packages/spomky-labs/jose) and 
-[firebase/php-jwt](https://packagist.org/packages/firebase/php-jwt) You will have to install one of these or create 
+[firebase/php-jwt](https://packagist.org/packages/firebase/php-jwt). You will have to install one of these or create 
 your own adaptor.
 
 ```bash
@@ -23,7 +23,7 @@ To create your own adaptor, just implement the `Okta/JwtVerifier/Adaptors/Adapto
 You will also need to install a PSR-7 compliant library. We suggest that you use `guzzlehttp/psr7` in your project.
 
 ```bash
-composer require guzzlehttp/psr-7
+composer require guzzlehttp/psr7
 ```
 
 ## Usage

@@ -32,6 +32,7 @@
         "php-http/mock-client": "^1.0",
         "guzzlehttp/psr7": "^1.4",
         "spomky-labs/jose": "^6.1",
-        "firebase/php-jwt": "^5.0"
+        "firebase/php-jwt": "^5.0",
+        "lcobucci/jwt": "^3"
     }
 }

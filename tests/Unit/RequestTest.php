@@ -16,45 +16,63 @@
  ******************************************************************************/
 
 use Okta\JwtVerifier\Request;
-use PHPUnit\Framework\TestCase;
 
 class RequestTest extends BaseTestCase
 {
     /** @test */
     public function makes_request_to_correct_location()
     {
+        $response = $this->getResponseMock();
+        $response
+            ->method('getStatusCode')
+            ->willReturn(200);
 
-        $this->response->method('getStatusCode')->willReturn(200);
+        $httpClient = $this->getClientMock();
+        $httpClient
+            ->method('send')
+            ->with($this->isInstanceOf(\Psr\Http\Message\RequestInterface::class))
+            ->willReturnCallback(function (\Psr\Http\Message\RequestInterface $request) use ($response) {
+                $this->assertEquals(
+                    'http://example.com',
+                    (string) $request->getUri(),
+                    'Did not make a request to the set URL'
+                );
 
-        $httpClient = new \Http\Mock\Client;
-        $httpClient->addResponse($this->response);
+                return $response;
+            });
 
         $request = new Request($httpClient);
 
         $response = $request->setUrl('http://example.com')->get();
-        $requests = $httpClient->getRequests();
 
         $this->assertInstanceOf(
             \Psr\Http\Message\ResponseInterface::class,
             $response,
             'Response was not an instance of ResponseInterface.'
         );
-
-        $this->assertEquals(
-            'http://example.com',
-            $requests[0]->getUri(),
-            'Did not make a request to the set URL'
-        );
-
     }
 
     /** @test */
     public function makes_request_to_correct_location_with_query()
     {
-        $this->response->method('getStatusCode')->willReturn(200);
+        $response = $this->getResponseMock();
+        $response
+            ->method('getStatusCode')
+            ->willReturn(200);
 
-        $httpClient = new \Http\Mock\Client;
-        $httpClient->addResponse($this->response);
+        $httpClient = $this->getClientMock();
+        $httpClient
+            ->method('send')
+            ->with($this->isInstanceOf(\Psr\Http\Message\RequestInterface::class))
+            ->willReturnCallback(function (\Psr\Http\Message\RequestInterface $request) use ($response) {
+                $this->assertEquals(
+                    'http://example.com?some=query&and=another',
+                    (string) $request->getUri(),
+                    'Did not make a request to the set URL'
+                );
+
+                return $response;
+            });
 
         $request = new Request($httpClient);
 
@@ -64,19 +82,10 @@ class RequestTest extends BaseTestCase
             ->withQuery('and','another')
             ->get();
 
-        $requests = $httpClient->getRequests();
-
         $this->assertInstanceOf(
             \Psr\Http\Message\ResponseInterface::class,
             $response,
             'Response was not an instance of ResponseInterface.'
         );
-
-        $this->assertEquals(
-            'http://example.com?some=query&and=another',
-            $requests[0]->getUri(),
-            'Did not make a request to the set URL'
-        );
-
     }
 }

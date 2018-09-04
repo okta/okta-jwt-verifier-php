@@ -1,52 +1,56 @@
 <?php
-/******************************************************************************
- * Copyright 2017 Okta, Inc.                                                  *
- *                                                                            *
- * Licensed under the Apache License, Version 2.0 (the "License");            *
- * you may not use this file except in compliance with the License.           *
- * You may obtain a copy of the License at                                    *
- *                                                                            *
- *      http://www.apache.org/licenses/LICENSE-2.0                            *
- *                                                                            *
- * Unless required by applicable law or agreed to in writing, software        *
- * distributed under the License is distributed on an "AS IS" BASIS,          *
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   *
- * See the License for the specific language governing permissions and        *
- * limitations under the License.                                             *
- ******************************************************************************/
 
 namespace Okta\JwtVerifier\Adaptors;
 
 use Okta\JwtVerifier\Jwt;
 use Okta\JwtVerifier\Request;
 
-class FirebasePhpJwt implements Adaptor
+class LcobucciJwt implements Adaptor
 {
     /**
      * @var Request
      */
-    private $request;
+    protected $request;
 
+    /**
+     * @param Request $request
+     */
     public function __construct(Request $request = null)
     {
         $this->request = $request ?: new Request();
     }
 
+    /**
+     * @param string $jku
+     * @return object|array
+     */
     public function getKeys($jku)
     {
         $keys = json_decode($this->request->setUrl($jku)->get()->getBody()->getContents());
-        return self::parseKeySet($keys);
+
+        return $this->parseKeySet($keys);
     }
 
+    /**
+     * @param string $jwt
+     * @param array $keys
+     * @return Jwt
+     */
     public function decode($jwt, $keys)
     {
-        $decoded = (array)\Firebase\JWT\JWT::decode($jwt, $keys, ['RS256']);
-        return (new Jwt($jwt, $decoded));
+        $decoded = (new \Lcobucci\JWT\Parser())->parse($jwt);
+
+        return (new Jwt($jwt, $decoded->getClaims()));
     }
 
+    /**
+     * @return bool
+     */
     public static function isPackageAvailable()
     {
-        return class_exists(\Firebase\JWT\JWT::class);
+        return
+            class_exists(\Lcobucci\JWT\Parsing\Decoder::class) &&
+            class_exists(\Lcobucci\JWT\Parser::class);
     }
 
     /**
@@ -54,7 +58,7 @@ class FirebasePhpJwt implements Adaptor
      * @param $source
      * @return array an associative array represents the set of keys
      */
-    public static function parseKeySet($source)
+    public function parseKeySet($source)
     {
         $keys = [];
         if (is_string($source)) {
@@ -77,7 +81,7 @@ class FirebasePhpJwt implements Adaptor
                         $k = $v->{'kid'};
                 }
                 try {
-                    $v = self::parseKey($v);
+                    $v = $this->parseKey($v);
                     $keys[$k] = $v;
                 } catch (\UnexpectedValueException $e) {
                     //Do nothing
@@ -95,7 +99,7 @@ class FirebasePhpJwt implements Adaptor
      * @param $source
      * @return resource|array an associative array represents the key
      */
-    public static function parseKey($source)
+    public function parseKey($source)
     {
         if (!is_array($source))
             $source = (array)$source;
@@ -105,7 +109,7 @@ class FirebasePhpJwt implements Adaptor
                     if (array_key_exists('d', $source))
                         throw new \UnexpectedValueException('Failed to parse JWK: RSA private key is not supported');
 
-                    $pem = self::createPemFromModulusAndExponent($source['n'], $source['e']);
+                    $pem = $this->createPemFromModulusAndExponent($source['n'], $source['e']);
                     $pKey = openssl_pkey_get_public($pem);
                     if ($pKey !== false)
                         return $pKey;
@@ -127,21 +131,22 @@ class FirebasePhpJwt implements Adaptor
      * @param string $e the RSA exponent encoded in Base64
      * @return string the RSA public key represented in PEM format
      */
-    private static function createPemFromModulusAndExponent($n, $e)
+    protected function createPemFromModulusAndExponent($n, $e)
     {
-        $modulus = \Firebase\JWT\JWT::urlsafeB64Decode($n);
-        $publicExponent = \Firebase\JWT\JWT::urlsafeB64Decode($e);
+        $decoder = new \Lcobucci\JWT\Parsing\Decoder();
 
+        $modulus = $decoder->base64UrlDecode($n);
+        $publicExponent = $decoder->base64UrlDecode($e);
 
-        $components = array(
-            'modulus' => pack('Ca*a*', 2, self::encodeLength(strlen($modulus)), $modulus),
-            'publicExponent' => pack('Ca*a*', 2, self::encodeLength(strlen($publicExponent)), $publicExponent)
-        );
+        $components = [
+            'modulus' => pack('Ca*a*', 2, $this->encodeLength(strlen($modulus)), $modulus),
+            'publicExponent' => pack('Ca*a*', 2, $this->encodeLength(strlen($publicExponent)), $publicExponent)
+        ];
 
         $RSAPublicKey = pack(
             'Ca*a*a*',
             48,
-            self::encodeLength(strlen($components['modulus']) + strlen($components['publicExponent'])),
+            $this->encodeLength(strlen($components['modulus']) + strlen($components['publicExponent'])),
             $components['modulus'],
             $components['publicExponent']
         );
@@ -150,7 +155,7 @@ class FirebasePhpJwt implements Adaptor
         // sequence(oid(1.2.840.113549.1.1.1), null)) = rsaEncryption.
         $rsaOID = pack('H*', '300d06092a864886f70d0101010500'); // hex version of MA0GCSqGSIb3DQEBAQUA
         $RSAPublicKey = chr(0) . $RSAPublicKey;
-        $RSAPublicKey = chr(3) . self::encodeLength(strlen($RSAPublicKey)) . $RSAPublicKey;
+        $RSAPublicKey = chr(3) . $this->encodeLength(strlen($RSAPublicKey)) . $RSAPublicKey;
 
         $RSAPublicKey = pack(
             'Ca*a*',
@@ -169,14 +174,16 @@ class FirebasePhpJwt implements Adaptor
     /**
      * DER-encode the length
      *
-     * DER supports lengths up to (2**8)**127, however, we'll only support lengths up to (2**8)**4.  See
-     * {@link http://itu.int/ITU-T/studygroups/com17/languages/X.690-0207.pdf#p=13 X.690 paragraph 8.1.3} for more information.
+     * DER supports lengths up to (2**8)**127, however, we'll only support lengths up to (2**8)**4.
+     * See
+     * {@link http://itu.int/ITU-T/studygroups/com17/languages/X.690-0207.pdf#p=13 X.690 paragraph 8.1.3}
+     * for more information.
      *
      * @access private
      * @param int $length
      * @return string
      */
-    private static function encodeLength($length)
+    protected function encodeLength($length)
     {
         if ($length <= 0x7F) {
             return chr($length);

@@ -20,14 +20,18 @@ use PHPUnit\Framework\TestCase;
 class BaseTestCase extends TestCase
 {
     /**
-     * @var PHPUnit_Framework_MockObject_MockObject
+     * @return \GuzzleHttp\ClientInterface|PHPUnit_Framework_MockObject_MockObject
      */
-    protected $response;
-
-    public function setUp()
+    protected function getClientMock()
     {
-        parent::setUp();
+        return $this->getMock('GuzzleHttp\ClientInterface', [], [], '', false);
+    }
 
-        $this->response = self::createMock('Psr\Http\Message\ResponseInterface');
+    /**
+     * @return PHPUnit_Framework_MockObject_MockObject|\Psr\Http\Message\ResponseInterface
+     */
+    protected function getResponseMock()
+    {
+        return $this->getMock('Psr\Http\Message\ResponseInterface');
     }
 }

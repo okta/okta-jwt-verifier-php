@@ -19,11 +19,18 @@ namespace Okta\JwtVerifier\Adaptors;
 
 class AutoDiscover
 {
+    /**
+     * @var array
+     */
     private static $adaptors = [
         SpomkyLabsJose::class,
         FirebasePhpJwt::class
     ];
 
+    /**
+     * @return Adaptor
+     * @throws \Exception
+     */
     public static function getAdaptor()
     {
         foreach(self::$adaptors as $adaptor) {

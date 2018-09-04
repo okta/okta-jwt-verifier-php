@@ -23,13 +23,16 @@ class JwtVerifierTest extends BaseTestCase
     /** @test */
     public function can_get_issuer_off_object()
     {
-        $this->response
+        $response = $this->getResponseMock();
+        $response
             ->method('getBody')
-            ->willreturn('{"issuer": "https://example.com"}');
+            ->willReturn('{"issuer": "https://example.com"}');
 
+        $httpClient = $this->getClientMock();
+        $httpClient
+            ->method('send')
+            ->willReturn($response);
 
-        $httpClient = new \Http\Mock\Client;
-        $httpClient->addResponse($this->response);
         $request = new \Okta\JwtVerifier\Request($httpClient);
 
         $verifier = new JwtVerifier(
@@ -49,13 +52,16 @@ class JwtVerifierTest extends BaseTestCase
     /** @test */
     public function can_get_discovery_off_object()
     {
-        $this->response
+        $response = $this->getResponseMock();
+        $response
             ->method('getBody')
-            ->willreturn('{"issuer": "https://example.com"}');
+            ->willReturn('{"issuer": "https://example.com"}');
 
+        $httpClient = $this->getClientMock();
+        $httpClient
+            ->method('send')
+            ->willReturn($response);
 
-        $httpClient = new \Http\Mock\Client;
-        $httpClient->addResponse($this->response);
         $request = new \Okta\JwtVerifier\Request($httpClient);
 
         $verifier = new JwtVerifier(
@@ -75,13 +81,16 @@ class JwtVerifierTest extends BaseTestCase
     /** @test */
     public function will_get_meta_data_when_verifier_is_constructed()
     {
-        $this->response
+        $response = $this->getResponseMock();
+        $response
             ->method('getBody')
-            ->willreturn('{"issuer": "https://example.com"}');
+            ->willReturn('{"issuer": "https://example.com"}');
 
+        $httpClient = $this->getClientMock();
+        $httpClient
+            ->method('send')
+            ->willReturn($response);
 
-        $httpClient = new \Http\Mock\Client;
-        $httpClient->addResponse($this->response);
         $request = new \Okta\JwtVerifier\Request($httpClient);
 
         $verifier = new JwtVerifier(
@@ -98,8 +107,5 @@ class JwtVerifierTest extends BaseTestCase
             $metaData->issuer,
             'Metadata was not accessed.'
         );
-
     }
-
-
 }

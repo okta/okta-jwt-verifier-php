@@ -17,20 +17,30 @@
 
 namespace Okta\JwtVerifier;
 
-use Http\Client\Common\PluginClient;
-use Http\Client\HttpClient;
-use Http\Discovery\HttpClientDiscovery;
+use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\UriInterface;
 use Http\Discovery\MessageFactoryDiscovery;
 use Http\Discovery\UriFactoryDiscovery;
 use Http\Message\MessageFactory;
 use Http\Message\UriFactory;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\UriInterface;
 
 class Request
 {
+    /**
+     * @var ClientInterface
+     */
     protected $httpClient;
+
+    /**
+     * @var UriFactory
+     */
     protected $uriFactory;
+
+    /**
+     * @var MessageFactory
+     */
     protected $messageFactory;
 
     /**
@@ -47,38 +57,58 @@ class Request
      */
     protected $query = [];
 
+    /**
+     * Request constructor.
+     * @param ClientInterface|null $httpClient
+     * @param UriFactory|null $uriFactory
+     * @param MessageFactory|null $messageFactory
+     */
     public function __construct(
-        HttpClient $httpClient = null,
+        ClientInterface $httpClient = null,
         UriFactory $uriFactory = null,
         MessageFactory $messageFactory = null
     ) {
-        $this->httpClient = new PluginClient(
-            $httpClient ?: HttpClientDiscovery::find()
-        );
-
+        $this->httpClient = $httpClient ?: new Client();
         $this->uriFactory = $uriFactory ?: UriFactoryDiscovery::find();
         $this->messageFactory = $messageFactory ?: MessageFactoryDiscovery::find();
     }
 
-    public function setUrl($url): Request
+    /**
+     * @param string|UriInterface $url
+     * @return self
+     */
+    public function setUrl($url)
     {
         $this->url = $this->uriFactory->createUri($url);
+
         return $this;
     }
 
-    public function withQuery($key, $value = null): Request
+    /**
+     * @param string $key
+     * @param mixed $value
+     * @return self
+     */
+    public function withQuery($key, $value = null)
     {
         $this->query[$key] = $value;
 
         return $this;
     }
 
-    public function get(): ResponseInterface
+    /**
+     * @return ResponseInterface
+     */
+    public function get()
     {
         return $this->request('GET');
     }
 
-    protected function request($method): ResponseInterface
+    /**
+     * @param string $method
+     * @return ResponseInterface
+     */
+    protected function request($method)
     {
         $headers = [];
         $headers['Accept'] = 'application/json';
@@ -89,9 +119,6 @@ class Request
 
         $request = $this->messageFactory->createRequest($method, $this->url, $headers);
 
-        return $this->httpClient->sendRequest($request);
-
+        return $this->httpClient->send($request);
     }
-
-
 }

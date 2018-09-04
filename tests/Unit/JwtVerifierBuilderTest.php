@@ -41,10 +41,12 @@ class JwtVerifierBuilderTest extends BaseTestCase
         );
     }
 
-    /** @test */
+    /**
+     * @test
+     * @expectedException \InvalidArgumentException
+     */
     public function building_the_jwt_verifier_throws_exception_if_issuer_not_set()
     {
-        $this->expectException(\InvalidArgumentException::class);
         $verifier = new JwtVerifierBuilder();
         $verifier->build();
     }
@@ -52,13 +54,16 @@ class JwtVerifierBuilderTest extends BaseTestCase
     /** @test */
     public function discovery_defaults_to_oauth_when_building()
     {
-        $this->response
+        $response = $this->getResponseMock();
+        $response
             ->method('getBody')
-            ->willreturn('{"issuer": "https://example.com"}');
+            ->willReturn('{"issuer": "https://example.com"}');
 
+        $httpClient = $this->getClientMock();
+        $httpClient
+            ->method('send')
+            ->willReturn($response);
 
-        $httpClient = new \Http\Mock\Client;
-        $httpClient->addResponse($this->response);
         $request = new \Okta\JwtVerifier\Request($httpClient);
 
         $verifier = new JwtVerifierBuilder($request);
@@ -75,13 +80,16 @@ class JwtVerifierBuilderTest extends BaseTestCase
     /** @test */
     public function building_the_verifier_returns_instance_of_jwt_verifier()
     {
-        $this->response
+        $response = $this->getResponseMock();
+        $response
             ->method('getBody')
-            ->willreturn('{"issuer": "https://example.com"}');
+            ->willReturn('{"issuer": "https://example.com"}');
 
+        $httpClient = $this->getClientMock();
+        $httpClient
+            ->method('send')
+            ->willReturn($response);
 
-        $httpClient = new \Http\Mock\Client;
-        $httpClient->addResponse($this->response);
         $request = new \Okta\JwtVerifier\Request($httpClient);
 
         $verifier = new JwtVerifierBuilder($request);
@@ -94,6 +102,4 @@ class JwtVerifierBuilderTest extends BaseTestCase
             'The verifier builder is not returning an instance of JwtVerifier'
         );
     }
-
-
 }

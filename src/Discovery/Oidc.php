@@ -21,18 +21,8 @@ use Okta\JwtVerifier\Discovery\DiscoveryMethod as Discovery;
 
 class Oidc extends Discovery
 {
-
-    protected $wellKnownUri = '/.well-known/openid-configuration';
-
     /**
-     * Get the defined well-known URI.  This is the URI
-     * that is concatenated to the issuer URL.
-     *
-     * @return string
+     * @var string
      */
-    public function getWellKnownUri(): string
-    {
-        return $this->wellKnownUri;
-    }
-
+    protected $wellKnownUri = '/.well-known/openid-configuration';
 }

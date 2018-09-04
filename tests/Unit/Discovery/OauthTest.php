@@ -26,7 +26,7 @@ class OauthTest extends BaseTestCase
 
         $this->assertEquals(
             '/.well-known/oauth-authorization-server',
-            $oauth->getWellKnownUri(),
+            $oauth->getWellKnown(),
             '.well-known endpoint is not set correctly'
         );
     }

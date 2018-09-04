@@ -19,45 +19,65 @@ namespace Okta\JwtVerifier;
 
 class Jwt
 {
-    public function __construct(
-        string $jwt,
-        array $claims
-    )
+    /**
+     * @var string
+     */
+    protected $jwt;
+
+    /**
+     * @var array
+     */
+    protected $claims;
+
+    /**
+     * @param string $jwt
+     * @param array $claims
+     */
+    public function __construct($jwt, array $claims)
     {
         $this->jwt = $jwt;
         $this->claims = $claims;
     }
 
+    /**
+     * @return string
+     */
     public function getJwt()
     {
         return $this->jwt;
     }
 
+    /**
+     * @return array
+     */
     public function getClaims()
     {
         return $this->claims;
     }
 
-    public function getExpirationTime($carbonInstance = true)
+    /**
+     * @return int
+     */
+    public function getExpirationTime()
     {
         $ts = $this->toJson()->exp;
-        if(class_exists(\Carbon\Carbon::class) && $carbonInstance) {
-            return \Carbon\Carbon::createFromTimestampUTC($ts);
-        }
 
         return $ts;
     }
 
-    public function getIssuedAt($carbonInstance = true)
+    /**
+     * @return int
+     */
+    public function getIssuedAt()
     {
         $ts = $this->toJson()->iat;
-        if(class_exists(\Carbon\Carbon::class) && $carbonInstance) {
-            return \Carbon\Carbon::createFromTimestampUTC($ts);
-        }
 
         return $ts;
     }
 
+    /**
+     * @return object
+     */
     public function toJson()
     {
         if(is_resource($this->claims)) {
@@ -65,7 +85,5 @@ class Jwt
         }
 
         return json_decode(json_encode($this->claims));
-
     }
-
 }

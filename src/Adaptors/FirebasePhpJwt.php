@@ -17,8 +17,10 @@
 
 namespace Okta\JwtVerifier\Adaptors;
 
+use Firebase\JWT\JWT as FirebaseJWT;
 use Okta\JwtVerifier\Jwt;
 use Okta\JwtVerifier\Request;
+use UnexpectedValueException;
 
 class FirebasePhpJwt implements Adaptor
 {
@@ -40,13 +42,13 @@ class FirebasePhpJwt implements Adaptor
 
     public function decode($jwt, $keys): Jwt
     {
-        $decoded = (array)\Firebase\JWT\JWT::decode($jwt, $keys, ['RS256']);
+        $decoded = (array)FirebaseJWT::decode($jwt, $keys, ['RS256']);
         return (new Jwt($jwt, $decoded));
     }
 
     public static function isPackageAvailable()
     {
-        return class_exists(\Firebase\JWT\JWT::class);
+        return class_exists(FirebaseJWT::class);
     }
 
     /**
@@ -129,8 +131,8 @@ class FirebasePhpJwt implements Adaptor
      */
     private static function createPemFromModulusAndExponent($n, $e)
     {
-        $modulus = \Firebase\JWT\JWT::urlsafeB64Decode($n);
-        $publicExponent = \Firebase\JWT\JWT::urlsafeB64Decode($e);
+        $modulus = FirebaseJWT::urlsafeB64Decode($n);
+        $publicExponent = FirebaseJWT::urlsafeB64Decode($e);
 
 
         $components = array(

@@ -10,12 +10,11 @@ composer require okta/jwt-verifier
 ```
 
 This library requires a JWT library. We currently support 
-[spomky-labs/jose](https://packagist.org/packages/spomky-labs/jose) and 
-[firebase/php-jwt](https://packagist.org/packages/firebase/php-jwt). You will have to install one of these or create 
+[firebase/php-jwt](https://packagist.org/packages/firebase/php-jwt). You will have to install this or create 
 your own adaptor.
 
 ```bash
-composer require spomky-labs/jose
+composer require firebase/php-jwt
 ```
 
 To create your own adaptor, just implement the `Okta/JwtVerifier/Adaptors/Adaptor` in your own class.
@@ -34,7 +33,7 @@ $jwt = 'eyJhbGciOiJSUzI1Nqd0FfRzh6X0ZsOGlJRnNoUlRuQUkweVUifQ.eyJ2ZXIiOjEsiOiJwaH
 
 $jwtVerifier = (new \Okta\JwtVerifier\JwtVerifierBuilder())
     ->setDiscovery(new \Okta\JwtVerifier\Discovery\Oauth) // This is not needed if using oauth.  The other option is OIDC
-    ->setAdaptor(new \Okta\JwtVerifier\Adaptors\SpomkyLabsJose)
+    ->setAdaptor(new \Okta\JwtVerifier\Adaptors\FirebasePhpJwt)
     ->setAudience('api://default')
     ->setClientId('{clientId}')
     ->setIssuer('https://{yourOktaDomain}.com/oauth2/default')

@@ -104,9 +104,9 @@ class JwtVerifierBuilder
      */
     public function build(): JwtVerifier
     {
-        validateIssuer($this->issuer);
+        $this->validateIssuer($this->issuer);
 
-        validateClientId($this->clientId);
+        $this->validateClientId($this->clientId);
 
         return new JwtVerifier(
             $this->issuer,

@@ -62,7 +62,7 @@ class JwtVerifierBuilderTest extends BaseTestCase
         $request = new \Okta\JwtVerifier\Request($httpClient);
 
         $verifier = new JwtVerifierBuilder($request);
-        $verifier = $verifier->setIssuer('https://my.issuer.com')
+        $verifier = $verifier->setIssuer('https://my.issuer.com')->setClientId("abc123")
             ->setAdaptor(new \Okta\JwtVerifier\Adaptors\SpomkyLabsJose())->build();
 
         $this->assertInstanceOf(
@@ -85,7 +85,7 @@ class JwtVerifierBuilderTest extends BaseTestCase
         $request = new \Okta\JwtVerifier\Request($httpClient);
 
         $verifier = new JwtVerifierBuilder($request);
-        $verifier = $verifier->setIssuer('https://my.issuer.com')
+        $verifier = $verifier->setIssuer('https://my.issuer.com')->setClientId("abc123")
             ->setAdaptor(new \Okta\JwtVerifier\Adaptors\SpomkyLabsJose())->build();
 
         $this->assertInstanceOf(

@@ -104,9 +104,9 @@ class JwtVerifierBuilder
      */
     public function build(): JwtVerifier
     {
-        if (null === $this->issuer) {
-            throw new \InvalidArgumentException('You must supply an issuer');
-        }
+        validateIssuer($this->issuer);
+
+        validateClientId($this->clientId);
 
         return new JwtVerifier(
             $this->issuer,
@@ -119,5 +119,43 @@ class JwtVerifierBuilder
                 'clientId' => $this->clientId
             ]
         );
+    }
+
+    /**
+     * Validate the issuer
+     *
+     * @param string $issuer
+     * @throws \InvalidArgumentException
+     * @return void
+     */
+    private function validateIssuer($issuer): void {
+        if (null === $issuer || "" == $issuer) {
+            throw new \InvalidArgumentException("Your Issuer is missing. You can find your issuer from your authorization server settings in the Okta Developer Console. Find out more information aobut Authorization Servers at https://developer.okta.com/docs/guides/customize-authz-server/overview/");
+        }
+
+        if (strstr($issuer, "https://") == false) {
+            throw new \InvalidArgumentException("Your Issuer must start with https. Current value: {$issuer}. You can copy your issuer from your authorization server settings in the Okta Developer Console. Find out more information aobut Authorization Servers at https://developer.okta.com/docs/guides/customize-authz-server/overview/");
+        }
+
+        if (strstr($issuer, "{yourOktaDomain}") != false) {
+            throw new \InvalidArgumentException("Replace {yourOktaDomain} with your Okta domain. You can copy your domain from the Okta Developer Console. Follow these instructions to find it: https://bit.ly/finding-okta-domain")
+        }
+    }
+
+    /**
+     * Validate the client id
+     *
+     * @param string $cid
+     * @throws \InvalidArgumentException
+     * @return void
+     */
+    private function validateClientId($cid): void {
+        if (null === $cid || "" == $cid) {
+            throw new \InvalidArgumentException("Your client ID is missing. You can copy it from the Okta Developer Console in the details for the Application you created. Follow these instructions to find it: https://bit.ly/finding-okta-app-credentials");
+        }
+
+        if (strstr($cid, "{clientId}") != false) {
+            throw new \InvalidArgumentException("Replace {clientId} with the client ID of your Application. You can copy it from the Okta Developer Console in the details for the Application you created. Follow these instructions to find it: https://bit.ly/finding-okta-app-credentials");
+        }
     }
 }

@@ -138,7 +138,7 @@ class JwtVerifierBuilder
         }
 
         if (strstr($issuer, "{yourOktaDomain}") != false) {
-            throw new \InvalidArgumentException("Replace {yourOktaDomain} with your Okta domain. You can copy your domain from the Okta Developer Console. Follow these instructions to find it: https://bit.ly/finding-okta-domain")
+            throw new \InvalidArgumentException("Replace {yourOktaDomain} with your Okta domain. You can copy your domain from the Okta Developer Console. Follow these instructions to find it: https://bit.ly/finding-okta-domain");
         }
     }
 

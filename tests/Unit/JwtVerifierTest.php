@@ -35,7 +35,7 @@ class JwtVerifierTest extends BaseTestCase
         $verifier = new JwtVerifier(
             'https://my.issuer.com',
             new \Okta\JwtVerifier\Discovery\Oauth(),
-            new \Okta\JwtVerifier\Adaptors\SpomkyLabsJose(),
+            new \Okta\JwtVerifier\Adaptors\FirebasePhpJwt(),
             $request
         );
 
@@ -61,7 +61,7 @@ class JwtVerifierTest extends BaseTestCase
         $verifier = new JwtVerifier(
             'https://my.issuer.com',
             new \Okta\JwtVerifier\Discovery\Oauth(),
-            new \Okta\JwtVerifier\Adaptors\SpomkyLabsJose(),
+            new \Okta\JwtVerifier\Adaptors\FirebasePhpJwt(),
             $request
         );
 
@@ -87,7 +87,7 @@ class JwtVerifierTest extends BaseTestCase
         $verifier = new JwtVerifier(
             'https://my.issuer.com',
             new \Okta\JwtVerifier\Discovery\Oauth(),
-            new \Okta\JwtVerifier\Adaptors\SpomkyLabsJose(),
+            new \Okta\JwtVerifier\Adaptors\FirebasePhpJwt(),
             $request
         );
 

@@ -20,7 +20,6 @@ namespace Okta\JwtVerifier\Adaptors;
 class AutoDiscover
 {
     private static $adaptors = [
-        SpomkyLabsJose::class,
         FirebasePhpJwt::class
     ];
 

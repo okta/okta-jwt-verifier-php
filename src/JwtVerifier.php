@@ -64,6 +64,7 @@ class JwtVerifier
         DiscoveryMethod $discovery = null,
         Adaptor $adaptor = null,
         Request $request = null,
+        int $leeway = 120,
         array $claimsToValidate = []
     ) {
         $this->issuer = $issuer;

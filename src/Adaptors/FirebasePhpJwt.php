@@ -29,9 +29,17 @@ class FirebasePhpJwt implements Adaptor
      */
     private $request;
 
-    public function __construct(Request $request = null)
+    /**
+     * Leeway in seconds
+     *
+     * @var int
+     */
+    private $leeway;
+
+    public function __construct(Request $request = null, int $leeway = 120)
     {
         $this->request = $request ?: new Request();
+        $this->leeway = $leeway;
     }
 
     public function getKeys($jku)
@@ -42,6 +50,7 @@ class FirebasePhpJwt implements Adaptor
 
     public function decode($jwt, $keys): Jwt
     {
+        FirebaseJWT::$leeway = $this->leeway;
         $decoded = (array)FirebaseJWT::decode($jwt, $keys, ['RS256']);
         return (new Jwt($jwt, $decoded));
     }

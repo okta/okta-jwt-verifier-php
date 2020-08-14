@@ -4,8 +4,41 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4cddc16964c4de0113d82e7483ccfc94",
+    "content-hash": "8f2dbe3cb2d5a7512588f0957f048cdd",
     "packages": [
+        {
+            "name": "bretterer/iso_duration_converter",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/bretterer/iso_duration_converter.git",
+                "reference": "1fa460fd9aec9853db812369a120cecfaf3d9c7b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/bretterer/iso_duration_converter/zipball/1fa460fd9aec9853db812369a120cecfaf3d9c7b",
+                "reference": "1fa460fd9aec9853db812369a120cecfaf3d9c7b",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Bretterer\\IsoDurationConverter\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Brian Retterer",
+                    "email": "bretterer@gmail.com"
+                }
+            ],
+            "description": "Easily convert ISO_8601 Duration time format to seconds and convert seconds to ISO-8601 Duration",
+            "time": "2016-02-11T16:37:19+00:00"
+        },
         {
             "name": "clue/stream-filter",
             "version": "v1.4.1",

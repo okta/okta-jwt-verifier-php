@@ -17,9 +17,10 @@
 
 namespace Okta\JwtVerifier;
 
+use Okta\JwtVerifier\Discovery\Oauth;
 use Okta\JwtVerifier\Adaptors\Adaptor;
 use Okta\JwtVerifier\Discovery\DiscoveryMethod;
-use Okta\JwtVerifier\Discovery\Oauth;
+use Bretterer\IsoDurationConverter\DurationParser;
 
 class JwtVerifierBuilder
 {
@@ -30,6 +31,7 @@ class JwtVerifierBuilder
     protected $audience;
     protected $clientId;
     protected $nonce;
+    protected $leeway = 120;
 
     public function __construct(Request $request = null)
     {
@@ -44,7 +46,7 @@ class JwtVerifierBuilder
      */
     public function setIssuer(string $issuer): self
     {
-        $this->issuer = $issuer;
+        $this->issuer = rtrim($issuer, "/");
 
         return $this;
     }
@@ -97,6 +99,25 @@ class JwtVerifierBuilder
     }
 
     /**
+     * Set the leeway using ISO_8601 Duration string. ie: PT2M
+     *
+     * @param string $leeway ISO_8601 Duration format. Default: PT2M
+     * @return self
+     * @throws \InvalidArgumentException
+     */
+    public function setLeeway(string $leeway = "PT2M"): self
+    {
+        if(strstr($leeway, "P")) {
+            throw new \InvalidArgumentException("It appears that the leeway provided is not in ISO_8601 Duration Format.  Please privide a duration in the format of `PT(n)S`");
+        }
+
+        $leeway = (new DurationParser)->parse($leeway);
+        $this->leeway = $leeway;
+
+        return $this;
+    }
+
+    /**
      * Build and return the JwtVerifier.
      *
      * @throws \InvalidArgumentException
@@ -113,6 +134,7 @@ class JwtVerifierBuilder
             $this->discovery,
             $this->adaptor,
             $this->request,
+            $this->leeway,
             [
                 'nonce' => $this->nonce,
                 'audience' => $this->audience,

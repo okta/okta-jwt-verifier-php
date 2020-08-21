@@ -2,6 +2,26 @@
 
 This library helps you verify tokens that have been issued by Okta.  To learn more about verification cases and Okta's tokens please read [Working With OAuth 2.0 Tokens](https://developer.okta.com/authentication-guide/tokens/)
 
+
+## Release status
+
+This library uses semantic versioning and follows Okta's [library version policy](https://developer.okta.com/code/library-versions/).
+
+| Version | Status                             |
+| ------- | ---------------------------------- |
+| 0.x     |  :warning: Beta Release (Retired)  |
+| 1.x     |  :heavy_check_mark: Release        |
+
+The latest release can always be found on the [releases page][github-releases].
+
+## Need help?
+
+If you run into problems using the SDK, you can
+
+* Ask questions on the [Okta Developer Forums][devforum]
+* Post [issues][github-issues] here on GitHub
+
+
 ## Installation
 The Okta JWT Verifier can be installed through composer.
 
@@ -9,8 +29,8 @@ The Okta JWT Verifier can be installed through composer.
 composer require okta/jwt-verifier
 ```
 
-This library requires a JWT library. We currently support 
-[firebase/php-jwt](https://packagist.org/packages/firebase/php-jwt). You will have to install this or create 
+This library requires a JWT library. We currently support
+[firebase/php-jwt](https://packagist.org/packages/firebase/php-jwt). You will have to install this or create
 your own adaptor.
 
 ```bash
@@ -54,3 +74,9 @@ dump($jwt->getExpirationTime()); //returns Carbon instance of Expiration Time
 dump($jwt->getExpirationTime(false)); //returns timestamp of Expiration Time
 
 ```
+
+
+[devforum]: https://devforum.okta.com/
+[lang-landing]: https://developer.okta.com/code/php/
+[github-issues]: /okta/okta-jwt-verifier-php/issues
+[github-releases]: /okta/okta-jwt-verifier-php/releases

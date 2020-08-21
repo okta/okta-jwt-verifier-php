@@ -62,8 +62,8 @@ class JwtVerifierBuilderTest extends BaseTestCase
         $request = new \Okta\JwtVerifier\Request($httpClient);
 
         $verifier = new JwtVerifierBuilder($request);
-        $verifier = $verifier->setIssuer('https://my.issuer.com')
-            ->setAdaptor(new \Okta\JwtVerifier\Adaptors\SpomkyLabsJose())->build();
+        $verifier = $verifier->setIssuer('https://my.issuer.com')->setClientId("abc123")
+            ->setAdaptor(new \Okta\JwtVerifier\Adaptors\FirebasePhpJwt())->build();
 
         $this->assertInstanceOf(
             \Okta\JwtVerifier\Discovery\Oauth::class,
@@ -85,8 +85,8 @@ class JwtVerifierBuilderTest extends BaseTestCase
         $request = new \Okta\JwtVerifier\Request($httpClient);
 
         $verifier = new JwtVerifierBuilder($request);
-        $verifier = $verifier->setIssuer('https://my.issuer.com')
-            ->setAdaptor(new \Okta\JwtVerifier\Adaptors\SpomkyLabsJose())->build();
+        $verifier = $verifier->setIssuer('https://my.issuer.com')->setClientId("abc123")
+            ->setAdaptor(new \Okta\JwtVerifier\Adaptors\FirebasePhpJwt())->build();
 
         $this->assertInstanceOf(
             \Okta\JwtVerifier\JwtVerifier::class,

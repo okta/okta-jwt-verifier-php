@@ -45,6 +45,11 @@ class JwtVerifier
     protected $claimsToValidate;
 
     /**
+     * @var string
+     */
+    protected $wellknown;
+
+    /**
      * @var mixed
      */
     protected $metaData;
@@ -59,14 +64,17 @@ class JwtVerifier
         DiscoveryMethod $discovery = null,
         Adaptor $adaptor = null,
         Request $request = null,
+        int $leeway = 120,
         array $claimsToValidate = []
     ) {
         $this->issuer = $issuer;
         $this->discovery = $discovery ?: new Oauth;
         $this->adaptor = $adaptor ?: AutoDiscover::getAdaptor();
         $request = $request ?: new Request;
-        $this->metaData = json_decode($request->setUrl($this->issuer.$this->discovery->getWellKnown())->get()
+        $this->wellknown = $this->issuer.$this->discovery->getWellKnown();
+        $this->metaData = json_decode($request->setUrl($this->wellknown)->get()
             ->getBody());
+
         $this->claimsToValidate = $claimsToValidate;
     }
 
@@ -87,6 +95,10 @@ class JwtVerifier
 
     public function verify($jwt)
     {
+        if($this->metaData->jwks_uri == null) {
+            throw new \DomainException("Could not access a valid JWKS_URI from the metadata.  We made a call to {$this->wellknown} endpoint, but jwks_uri was null. Please make sure you are using a custom authorization server for the jwt verifier.");
+        }
+
         $keys = $this->adaptor->getKeys($this->metaData->jwks_uri);
 
         $decoded =  $this->adaptor->decode($jwt, $keys);
@@ -110,7 +122,7 @@ class JwtVerifier
         }
 
         if($claims['nonce'] != $this->claimsToValidate['nonce']) {
-            throw new \Exception('Nonce does not match what is expected. Make sure to provide the nonce with 
+            throw new \Exception('Nonce does not match what is expected. Make sure to provide the nonce with
             `setNonce()` from the JwtVerifierBuilder.');
         }
     }
@@ -122,7 +134,7 @@ class JwtVerifier
         }
 
         if($claims['aud'] != $this->claimsToValidate['audience']) {
-            throw new \Exception('Audience does not match what is expected. Make sure to provide the audience with 
+            throw new \Exception('Audience does not match what is expected. Make sure to provide the audience with
             `setAudience()` from the JwtVerifierBuilder.');
         }
     }
@@ -134,7 +146,7 @@ class JwtVerifier
         }
 
         if($claims['cid'] != $this->claimsToValidate['clientId']) {
-            throw new \Exception('ClientId does not match what is expected. Make sure to provide the client id with 
+            throw new \Exception('ClientId does not match what is expected. Make sure to provide the client id with
             `setClientId()` from the JwtVerifierBuilder.');
         }
     }

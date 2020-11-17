@@ -42,7 +42,7 @@ class FirebasePhpJwt implements Adaptor
         $this->leeway = $leeway;
     }
 
-    public function getKeys($jku)
+    public function getKeys($jku): array
     {
         $keys = json_decode($this->request->setUrl($jku)->get()->getBody()->getContents());
         return self::parseKeySet($keys);
@@ -55,7 +55,7 @@ class FirebasePhpJwt implements Adaptor
         return (new Jwt($jwt, $decoded));
     }
 
-    public static function isPackageAvailable()
+    public static function isPackageAvailable(): bool
     {
         return class_exists(FirebaseJWT::class);
     }
@@ -65,27 +65,31 @@ class FirebasePhpJwt implements Adaptor
      * @param $source
      * @return array an associative array represents the set of keys
      */
-    public static function parseKeySet($source)
+    public static function parseKeySet($source): array
     {
         $keys = [];
         if (is_string($source)) {
             $source = json_decode($source, true);
         } else if (is_object($source)) {
-            if (property_exists($source, 'keys'))
+            if (property_exists($source, 'keys')) {
                 $source = (array)$source;
-            else
+            } else {
                 $source = [$source];
+            }
         }
         if (is_array($source)) {
-            if (isset($source['keys']))
+            if (isset($source['keys'])) {
                 $source = $source['keys'];
+            }
 
             foreach ($source as $k => $v) {
                 if (!is_string($k)) {
-                    if (is_array($v) && isset($v['kid']))
+                    if (is_array($v) && isset($v['kid'])) {
                         $k = $v['kid'];
-                    elseif (is_object($v) && property_exists($v, 'kid'))
+                    }
+                    elseif (is_object($v) && property_exists($v, 'kid')) {
                         $k = $v->{'kid'};
+                    }
                 }
                 try {
                     $v = self::parseKey($v);
@@ -95,10 +99,12 @@ class FirebasePhpJwt implements Adaptor
                 }
             }
         }
-        if (0 < count($keys)) {
-            return $keys;
+
+        if (0 === count($keys)) {
+            throw new UnexpectedValueException('Failed to parse JWK');
         }
-        throw new UnexpectedValueException('Failed to parse JWK');
+
+        return $keys;
     }
 
     /**
@@ -108,18 +114,21 @@ class FirebasePhpJwt implements Adaptor
      */
     public static function parseKey($source)
     {
-        if (!is_array($source))
+        if (!is_array($source)) {
             $source = (array)$source;
-        if (!empty($source) && isset($source['kty']) && isset($source['n']) && isset($source['e'])) {
+        }
+        if (isset($source['kty'], $source['n'], $source['e'])) {
             switch ($source['kty']) {
                 case 'RSA':
-                    if (array_key_exists('d', $source))
+                    if (array_key_exists('d', $source)) {
                         throw new UnexpectedValueException('Failed to parse JWK: RSA private key is not supported');
+                    }
 
                     $pem = self::createPemFromModulusAndExponent($source['n'], $source['e']);
                     $pKey = openssl_pkey_get_public($pem);
-                    if ($pKey !== false)
+                    if ($pKey !== false) {
                         return $pKey;
+                    }
                     break;
                 default:
                     //Currently only RSA is supported
@@ -138,7 +147,7 @@ class FirebasePhpJwt implements Adaptor
      * @param string $e the RSA exponent encoded in Base64
      * @return string the RSA public key represented in PEM format
      */
-    private static function createPemFromModulusAndExponent($n, $e)
+    private static function createPemFromModulusAndExponent(string $n, string $e): string
     {
         $modulus = FirebaseJWT::urlsafeB64Decode($n);
         $publicExponent = FirebaseJWT::urlsafeB64Decode($e);
@@ -187,7 +196,7 @@ class FirebasePhpJwt implements Adaptor
      * @param int $length
      * @return string
      */
-    private static function encodeLength($length)
+    private static function encodeLength(int $length): string
     {
         if ($length <= 0x7F) {
             return chr($length);

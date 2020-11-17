@@ -15,15 +15,19 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
+use Http\Mock\Client;
+use Okta\JwtVerifier\Adaptors\FirebasePhpJwt;
+use Okta\JwtVerifier\JwtVerifier;
 use Okta\JwtVerifier\JwtVerifierBuilder;
+use Okta\JwtVerifier\Request;
 
 class JwtVerifierBuilderTest extends BaseTestCase
 {
     /** @test */
-    public function when_setting_issuer_self_is_returned()
+    public function when_setting_issuer_self_is_returned(): void
     {
         $verifier = new JwtVerifierBuilder();
-        $this->assertInstanceOf(
+        self::assertInstanceOf(
             JwtVerifierBuilder::class,
             $verifier->setIssuer('https://my.issuer.com'),
             'Setting the issuer does not return self.'
@@ -31,10 +35,10 @@ class JwtVerifierBuilderTest extends BaseTestCase
     }
 
     /** @test */
-    public function when_setting_discovery_self_is_returned()
+    public function when_setting_discovery_self_is_returned(): void
     {
         $verifier = new JwtVerifierBuilder();
-        $this->assertInstanceOf(
+        self::assertInstanceOf(
             JwtVerifierBuilder::class,
             $verifier->setDiscovery(new \Okta\JwtVerifier\Discovery\Oauth()),
             'Settings discovery does not return self.'
@@ -42,30 +46,30 @@ class JwtVerifierBuilderTest extends BaseTestCase
     }
 
     /** @test */
-    public function building_the_jwt_verifier_throws_exception_if_issuer_not_set()
+    public function building_the_jwt_verifier_throws_exception_if_issuer_not_set(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $verifier = new JwtVerifierBuilder();
         $verifier->build();
     }
 
     /** @test */
-    public function discovery_defaults_to_oauth_when_building()
+    public function discovery_defaults_to_oauth_when_building(): void
     {
         $this->response
             ->method('getBody')
             ->willreturn('{"issuer": "https://example.com"}');
 
 
-        $httpClient = new \Http\Mock\Client;
+        $httpClient = new Client;
         $httpClient->addResponse($this->response);
-        $request = new \Okta\JwtVerifier\Request($httpClient);
+        $request = new Request($httpClient);
 
         $verifier = new JwtVerifierBuilder($request);
         $verifier = $verifier->setIssuer('https://my.issuer.com')->setClientId("abc123")
-            ->setAdaptor(new \Okta\JwtVerifier\Adaptors\FirebasePhpJwt())->build();
+            ->setAdaptor(new FirebasePhpJwt())->build();
 
-        $this->assertInstanceOf(
+        self::assertInstanceOf(
             \Okta\JwtVerifier\Discovery\Oauth::class,
             $verifier->getDiscovery(),
             'The builder is not defaulting to oauth2 discovery'
@@ -73,23 +77,23 @@ class JwtVerifierBuilderTest extends BaseTestCase
     }
 
     /** @test */
-    public function building_the_verifier_returns_instance_of_jwt_verifier()
+    public function building_the_verifier_returns_instance_of_jwt_verifier(): void
     {
         $this->response
             ->method('getBody')
             ->willreturn('{"issuer": "https://example.com"}');
 
 
-        $httpClient = new \Http\Mock\Client;
+        $httpClient = new Client;
         $httpClient->addResponse($this->response);
-        $request = new \Okta\JwtVerifier\Request($httpClient);
+        $request = new Request($httpClient);
 
         $verifier = new JwtVerifierBuilder($request);
         $verifier = $verifier->setIssuer('https://my.issuer.com')->setClientId("abc123")
-            ->setAdaptor(new \Okta\JwtVerifier\Adaptors\FirebasePhpJwt())->build();
+            ->setAdaptor(new FirebasePhpJwt())->build();
 
-        $this->assertInstanceOf(
-            \Okta\JwtVerifier\JwtVerifier::class,
+        self::assertInstanceOf(
+            JwtVerifier::class,
             $verifier,
             'The verifier builder is not returning an instance of JwtVerifier'
         );

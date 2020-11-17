@@ -15,31 +15,33 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
+use Http\Mock\Client;
+use Okta\JwtVerifier\Adaptors\FirebasePhpJwt;
+use Okta\JwtVerifier\Discovery\Oauth;
 use Okta\JwtVerifier\JwtVerifier;
-use PHPUnit\Framework\TestCase;
+use Okta\JwtVerifier\Request;
 
 class JwtVerifierTest extends BaseTestCase
 {
     /** @test */
-    public function can_get_issuer_off_object()
+    public function can_get_issuer_off_object(): void
     {
         $this->response
             ->method('getBody')
             ->willreturn('{"issuer": "https://example.com"}');
 
-
-        $httpClient = new \Http\Mock\Client;
+        $httpClient = new Client;
         $httpClient->addResponse($this->response);
-        $request = new \Okta\JwtVerifier\Request($httpClient);
+        $request = new Request($httpClient);
 
         $verifier = new JwtVerifier(
             'https://my.issuer.com',
-            new \Okta\JwtVerifier\Discovery\Oauth(),
-            new \Okta\JwtVerifier\Adaptors\FirebasePhpJwt(),
+            new Oauth(),
+            new FirebasePhpJwt(),
             $request
         );
 
-        $this->assertEquals(
+        self::assertEquals(
             'https://my.issuer.com',
             $verifier->getIssuer(),
             'Does not return issuer correctly'
@@ -47,55 +49,53 @@ class JwtVerifierTest extends BaseTestCase
     }
 
     /** @test */
-    public function can_get_discovery_off_object()
+    public function can_get_discovery_off_object(): void
     {
         $this->response
             ->method('getBody')
             ->willreturn('{"issuer": "https://example.com"}');
 
-
-        $httpClient = new \Http\Mock\Client;
+        $httpClient = new Client;
         $httpClient->addResponse($this->response);
-        $request = new \Okta\JwtVerifier\Request($httpClient);
+        $request = new Request($httpClient);
 
         $verifier = new JwtVerifier(
             'https://my.issuer.com',
-            new \Okta\JwtVerifier\Discovery\Oauth(),
-            new \Okta\JwtVerifier\Adaptors\FirebasePhpJwt(),
+            new Oauth(),
+            new FirebasePhpJwt(),
             $request
         );
 
-        $this->assertInstanceOf(
-            \Okta\JwtVerifier\Discovery\Oauth::class,
+        self::assertInstanceOf(
+            Oauth::class,
             $verifier->getDiscovery(),
             'Does not return discovery correctly'
         );
     }
 
     /** @test */
-    public function will_get_meta_data_when_verifier_is_constructed()
+    public function will_get_meta_data_when_verifier_is_constructed(): void
     {
         $this->response
             ->method('getBody')
-            ->willreturn('{"issuer": "https://example.com"}');
+            ->willreturn('{"jwks_uri": "https://example.com"}');
 
-
-        $httpClient = new \Http\Mock\Client;
+        $httpClient = new Client;
         $httpClient->addResponse($this->response);
-        $request = new \Okta\JwtVerifier\Request($httpClient);
+        $request = new Request($httpClient);
 
         $verifier = new JwtVerifier(
             'https://my.issuer.com',
-            new \Okta\JwtVerifier\Discovery\Oauth(),
-            new \Okta\JwtVerifier\Adaptors\FirebasePhpJwt(),
+            new Oauth(),
+            new FirebasePhpJwt(),
             $request
         );
 
         $metaData = $verifier->getMetaData();
 
-        $this->assertEquals(
+        self::assertEquals(
             'https://example.com',
-            $metaData->issuer,
+            $metaData->jwks_uri,
             'Metadata was not accessed.'
         );
 

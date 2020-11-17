@@ -23,5 +23,5 @@ interface Adaptor
 {
     public function getKeys($jku);
     public function decode($jwt, $keys): Jwt;
-    public static function isPackageAvailable();
+    public static function isPackageAvailable(): bool;
 }

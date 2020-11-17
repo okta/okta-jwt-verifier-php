@@ -17,14 +17,8 @@
 
 namespace Okta\JwtVerifier\Discovery;
 
-class Oauth implements DiscoveryMethodInterface
+class Oauth implements DiscoveryMethod
 {
-    /**
-     * Get the defined well-known URI.  This is the URI
-     * that is concatenated to the issuer URL.
-     *
-     * @return string
-     */
     public function getWellKnown(): string
     {
         return '/.well-known/oauth-authorization-server';

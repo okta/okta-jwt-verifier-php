@@ -17,8 +17,20 @@
 
 namespace Okta\JwtVerifier;
 
+use Carbon\Carbon;
+
 class Jwt
 {
+    /**
+     * @var string
+     */
+    private $jwt;
+
+    /**
+     * @var array
+     */
+    private $claims;
+
     public function __construct(
         string $jwt,
         array $claims
@@ -28,44 +40,48 @@ class Jwt
         $this->claims = $claims;
     }
 
-    public function getJwt()
+    public function getJwt(): string
     {
         return $this->jwt;
     }
 
-    public function getClaims()
+    public function getClaims(): array
     {
         return $this->claims;
     }
 
+    /**
+     * @param bool $carbonInstance
+     * @return Carbon|int
+     */
     public function getExpirationTime($carbonInstance = true)
     {
+        /** @var int $ts */
         $ts = $this->toJson()->exp;
-        if(class_exists(\Carbon\Carbon::class) && $carbonInstance) {
-            return \Carbon\Carbon::createFromTimestampUTC($ts);
+        if ($carbonInstance && class_exists(Carbon::class)) {
+            return Carbon::createFromTimestampUTC($ts);
         }
 
         return $ts;
     }
 
+    /**
+     * @param bool $carbonInstance
+     * @return Carbon|int
+     */
     public function getIssuedAt($carbonInstance = true)
     {
+        /** @var int $ts */
         $ts = $this->toJson()->iat;
-        if(class_exists(\Carbon\Carbon::class) && $carbonInstance) {
-            return \Carbon\Carbon::createFromTimestampUTC($ts);
+        if ($carbonInstance && class_exists(Carbon::class)) {
+            return Carbon::createFromTimestampUTC($ts);
         }
 
         return $ts;
     }
 
-    public function toJson()
+    public function toJson(): object
     {
-        if(is_resource($this->claims)) {
-            throw new \InvalidArgumentException('Could not convert to JSON');
-        }
-
         return json_decode(json_encode($this->claims));
-
     }
-
 }

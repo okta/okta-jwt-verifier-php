@@ -17,7 +17,17 @@
 
 namespace Okta\JwtVerifier\Discovery;
 
-interface DiscoveryMethodInterface
+class DefaultDiscoveryMethod implements DiscoveryMethod
 {
-    public function getWellKnown(): string;
+    protected $wellKnown;
+
+    public function __construct(string $wellKnown)
+    {
+        $this->wellKnown = $wellKnown;
+    }
+
+    public function getWellKnown(): string
+    {
+        return $this->wellKnown;
+    }
 }

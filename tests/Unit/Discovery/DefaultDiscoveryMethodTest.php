@@ -16,16 +16,16 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-use Okta\JwtVerifier\Discovery\DiscoveryMethod;
+use Okta\JwtVerifier\Discovery\DefaultDiscoveryMethod;
 
-class DiscoveryMethodTest extends BaseTestCase
+class DefaultDiscoveryMethodTest extends BaseTestCase
 {
     /** @test */
-    public function sets_well_known_correctly()
+    public function sets_well_known_correctly(): void
     {
-        $oauth = new DiscoveryMethod('test');
+        $oauth = new DefaultDiscoveryMethod('test');
 
-        $this->assertEquals(
+        self::assertEquals(
             'test',
             $oauth->getWellKnown(),
             '.well-known endpoint is not set correctly'

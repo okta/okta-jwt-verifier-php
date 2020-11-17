@@ -111,6 +111,16 @@ If you run into problems using the SDK, you can
 The above are the basic steps for verifying an access token locally. The steps are not tied directly to a framework so
 you could plug in the `okta/okta-jwt` into the framework of your choice.
 
+## Development
+
+The repository contains a `Dockerfile` you can use to run the test suite locally:
+
+```bash
+# build the docker
+docker build -t okta-jwt-verifier .
+# run the tests
+docker run --rm --volume "$PWD":/app okta-jwt-verifier vendor/bin/phpunit
+```
 
 [devforum]: https://devforum.okta.com/
 [lang-landing]: https://developer.okta.com/code/php/

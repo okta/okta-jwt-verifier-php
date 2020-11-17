@@ -17,18 +17,10 @@
 
 namespace Okta\JwtVerifier\Discovery;
 
-class Oidc implements DiscoveryMethodInterface
+class Oidc implements DiscoveryMethod
 {
-
-    /**
-     * Get the defined well-known URI.  This is the URI
-     * that is concatenated to the issuer URL.
-     *
-     * @return string
-     */
     public function getWellKnown(): string
     {
         return '/.well-known/openid-configuration';
     }
-
 }

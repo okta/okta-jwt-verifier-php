@@ -17,14 +17,10 @@
 
 namespace Okta\JwtVerifier;
 
-use Http\Client\Common\PluginClient;
-use Http\Client\HttpClient;
-use Http\Discovery\HttpClientDiscovery;
-use Http\Discovery\MessageFactoryDiscovery;
-use Http\Discovery\UriFactoryDiscovery;
+use DomainException;
 use Okta\JwtVerifier\Adaptors\Adaptor;
 use Okta\JwtVerifier\Adaptors\AutoDiscover;
-use Okta\JwtVerifier\Discovery\DiscoveryMethodInterface;
+use Okta\JwtVerifier\Discovery\DiscoveryMethod;
 use Okta\JwtVerifier\Discovery\Oauth;
 
 class JwtVerifier
@@ -35,9 +31,14 @@ class JwtVerifier
     protected $issuer;
 
     /**
-     * @var DiscoveryMethodInterface
+     * @var DiscoveryMethod
      */
     protected $discovery;
+
+    /**
+     * @var int
+     */
+    protected $leeway;
 
     /**
      * @var array
@@ -47,7 +48,7 @@ class JwtVerifier
     /**
      * @var string
      */
-    protected $wellknown;
+    protected $wellKnown;
 
     /**
      * @var mixed
@@ -61,9 +62,9 @@ class JwtVerifier
 
     public function __construct(
         string $issuer,
-        DiscoveryMethodInterface $discovery = null,
-        Adaptor $adaptor = null,
-        Request $request = null,
+        ?DiscoveryMethod $discovery = null,
+        ?Adaptor $adaptor = null,
+        ?Request $request = null,
         int $leeway = 120,
         array $claimsToValidate = []
     ) {
@@ -71,20 +72,20 @@ class JwtVerifier
         $this->discovery = $discovery ?: new Oauth;
         $this->adaptor = $adaptor ?: AutoDiscover::getAdaptor();
         $request = $request ?: new Request;
-        $this->wellknown = $this->issuer.$this->discovery->getWellKnown();
+        $this->wellKnown = $this->issuer.$this->discovery->getWellKnown();
         $this->metaData = json_decode(
-            $request->setUrl($this->wellknown)->get()->getBody()
+            $request->setUrl($this->wellKnown)->get()->getBody()
         );
-
+        $this->leeway = $leeway;
         $this->claimsToValidate = $claimsToValidate;
     }
 
-    public function getIssuer()
+    public function getIssuer(): string
     {
         return $this->issuer;
     }
 
-    public function getDiscovery()
+    public function getDiscovery(): DiscoveryMethod
     {
         return $this->discovery;
     }
@@ -94,10 +95,10 @@ class JwtVerifier
         return $this->metaData;
     }
 
-    public function verify($jwt)
+    public function verify($jwt): Jwt
     {
-        if($this->metaData->jwks_uri == null) {
-            throw new \DomainException("Could not access a valid JWKS_URI from the metadata.  We made a call to {$this->wellknown} endpoint, but jwks_uri was null. Please make sure you are using a custom authorization server for the jwt verifier.");
+        if ($this->metaData->jwks_uri === null) {
+            throw new DomainException("Could not access a valid JWKS_URI from the metadata.  We made a call to {$this->wellKnown} endpoint, but jwks_uri was null. Please make sure you are using a custom authorization server for the jwt verifier.");
         }
 
         $keys = $this->adaptor->getKeys($this->metaData->jwks_uri);
@@ -109,46 +110,49 @@ class JwtVerifier
         return $decoded;
     }
 
-    private function validateClaims(array $claims)
+    private function validateClaims(array $claims): void
     {
         $this->validateNonce($claims);
         $this->validateAudience($claims);
         $this->validateClientId($claims);
     }
 
-    private function validateNonce($claims)
+    private function validateNonce($claims): void
     {
-        if(!isset($claims['nonce']) && $this->claimsToValidate['nonce'] == null) {
-            return false;
-        }
-
-        if($claims['nonce'] != $this->claimsToValidate['nonce']) {
-            throw new \Exception('Nonce does not match what is expected. Make sure to provide the nonce with
-            `setNonce()` from the JwtVerifierBuilder.');
+        if (isset($claims['nonce'])
+            && $this->claimsToValidate['nonce'] !== null
+            && $claims['nonce'] !== $this->claimsToValidate['nonce']
+        ) {
+            throw new DomainException(
+                'Nonce does not match what is expected. ' .
+                'Make sure to provide the nonce with `setNonce()` from the JwtVerifierBuilder.'
+            );
         }
     }
 
-    private function validateAudience($claims)
+    private function validateAudience($claims): void
     {
-        if(!isset($claims['aud']) && $this->claimsToValidate['audience'] == null) {
-            return false;
-        }
-
-        if($claims['aud'] != $this->claimsToValidate['audience']) {
-            throw new \Exception('Audience does not match what is expected. Make sure to provide the audience with
-            `setAudience()` from the JwtVerifierBuilder.');
+        if (isset($claims['aud'])
+            && $this->claimsToValidate['audience'] !== null
+            && $claims['aud'] !== $this->claimsToValidate['audience']
+        ) {
+            throw new DomainException(
+                'Audience does not match what is expected. ' .
+                'Make sure to provide the audience with `setAudience()` from the JwtVerifierBuilder.'
+            );
         }
     }
 
-    private function validateClientId($claims)
+    private function validateClientId($claims): void
     {
-        if(!isset($claims['cid']) && $this->claimsToValidate['clientId'] == null) {
-            return false;
-        }
-
-        if($claims['cid'] != $this->claimsToValidate['clientId']) {
-            throw new \Exception('ClientId does not match what is expected. Make sure to provide the client id with
-            `setClientId()` from the JwtVerifierBuilder.');
+        if (isset($claims['cid'])
+            && $this->claimsToValidate['clientId'] !== null
+            && $claims['cid'] !== $this->claimsToValidate['clientId']
+        ) {
+            throw new DomainException(
+                'ClientId does not match what is expected. ' .
+                'Make sure to provide the client id with `setClientId()` from the JwtVerifierBuilder.'
+            );
         }
     }
 }

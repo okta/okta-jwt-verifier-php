@@ -1,4 +1,5 @@
 <?php
+
 /******************************************************************************
  * Copyright 2017 Okta, Inc.                                                  *
  *                                                                            *
@@ -15,6 +16,7 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
+use Psr\Http\Message\ResponseInterface;
 use PHPUnit\Framework\TestCase;
 
 class BaseTestCase extends TestCase
@@ -28,6 +30,6 @@ class BaseTestCase extends TestCase
     {
         parent::setUp();
 
-        $this->response = self::createMock('Psr\Http\Message\ResponseInterface');
+        $this->response = $this->createMock(ResponseInterface::class);
     }
 }

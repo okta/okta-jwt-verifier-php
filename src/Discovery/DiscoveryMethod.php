@@ -17,18 +17,13 @@
 
 namespace Okta\JwtVerifier\Discovery;
 
-
-class DiscoveryMethod implements DiscoveryMethodInterface
+interface DiscoveryMethod
 {
-    protected $wellKnown;
-
-    public function __construct(string $wellKnown)
-    {
-        $this->wellKnown = $wellKnown;
-    }
-
-    public function getWellKnown(): string
-    {
-        return $this->wellKnown;
-    }
+    /**
+     * Get the defined well-known URI.  This is the URI
+     * that is concatenated to the issuer URL.
+     *
+     * @return string
+     */
+    public function getWellKnown(): string;
 }

@@ -17,22 +17,16 @@
 
 namespace Okta\JwtVerifier\Discovery;
 
-use Okta\JwtVerifier\Discovery\DiscoveryMethod as Discovery;
-
-class Oauth extends Discovery
+class Oauth implements DiscoveryMethodInterface
 {
-
-    protected $wellKnownUri = '/.well-known/oauth-authorization-server';
-
     /**
      * Get the defined well-known URI.  This is the URI
      * that is concatenated to the issuer URL.
      *
      * @return string
      */
-    public function getWellKnownUri(): string
+    public function getWellKnown(): string
     {
-        return $this->wellKnownUri;
+        return '/.well-known/oauth-authorization-server';
     }
-
 }

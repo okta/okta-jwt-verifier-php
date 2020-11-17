@@ -1,4 +1,5 @@
 <?php
+
 /******************************************************************************
  * Copyright 2017 Okta, Inc.                                                  *
  *                                                                            *
@@ -15,20 +16,20 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-namespace Okta\JwtVerifier\Discovery;
+use Okta\JwtVerifier\Discovery\DiscoveryMethod;
 
-
-class DiscoveryMethod implements DiscoveryMethodInterface
+class DiscoveryMethodTest extends BaseTestCase
 {
-    protected $wellKnown;
-
-    public function __construct(string $wellKnown)
+    /** @test */
+    public function sets_well_known_correctly()
     {
-        $this->wellKnown = $wellKnown;
+        $oauth = new DiscoveryMethod('test');
+
+        $this->assertEquals(
+            'test',
+            $oauth->getWellKnown(),
+            '.well-known endpoint is not set correctly'
+        );
     }
 
-    public function getWellKnown(): string
-    {
-        return $this->wellKnown;
-    }
 }

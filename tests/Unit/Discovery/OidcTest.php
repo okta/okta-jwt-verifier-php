@@ -15,20 +15,20 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-namespace Okta\JwtVerifier\Discovery;
+use Okta\JwtVerifier\Discovery\Oidc;
 
-
-class DiscoveryMethod implements DiscoveryMethodInterface
+class OidcTest extends BaseTestCase
 {
-    protected $wellKnown;
-
-    public function __construct(string $wellKnown)
+    /** @test */
+    public function sets_well_known_correctly()
     {
-        $this->wellKnown = $wellKnown;
+        $oauth = new Oidc();
+
+        $this->assertEquals(
+            '/.well-known/openid-configuration',
+            $oauth->getWellKnown(),
+            '.well-known endpoint is not set correctly'
+        );
     }
 
-    public function getWellKnown(): string
-    {
-        return $this->wellKnown;
-    }
 }

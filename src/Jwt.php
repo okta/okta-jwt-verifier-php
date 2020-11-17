@@ -18,31 +18,29 @@
 namespace Okta\JwtVerifier;
 
 use Carbon\Carbon;
+use Carbon\CarbonInterface;
 
 class Jwt
 {
     /**
      * @var string
      */
-    private $jwt;
+    private $token;
 
     /**
      * @var array
      */
     private $claims;
 
-    public function __construct(
-        string $jwt,
-        array $claims
-    )
+    public function __construct(string $jwt, array $claims)
     {
-        $this->jwt = $jwt;
+        $this->token = $jwt;
         $this->claims = $claims;
     }
 
-    public function getJwt(): string
+    public function getToken(): string
     {
-        return $this->jwt;
+        return $this->token;
     }
 
     public function getClaims(): array
@@ -52,12 +50,16 @@ class Jwt
 
     /**
      * @param bool $carbonInstance
-     * @return Carbon|int
+     * @return CarbonInterface|int
      */
     public function getExpirationTime($carbonInstance = true)
     {
-        /** @var int $ts */
-        $ts = $this->toJson()->exp;
+        if (!isset($this->claims['exp'])) {
+            throw new \DomainException('JWT does not contain "exp" claim');
+        }
+
+        $ts = $this->claims['exp'];
+
         if ($carbonInstance && class_exists(Carbon::class)) {
             return Carbon::createFromTimestampUTC($ts);
         }
@@ -67,21 +69,20 @@ class Jwt
 
     /**
      * @param bool $carbonInstance
-     * @return Carbon|int
+     * @return CarbonInterface|int
      */
     public function getIssuedAt($carbonInstance = true)
     {
-        /** @var int $ts */
-        $ts = $this->toJson()->iat;
+        if (!isset($this->claims['iat'])) {
+            throw new \DomainException('JWT does not contain "iat" claim');
+        }
+
+        $ts = $this->claims['iat'];
+
         if ($carbonInstance && class_exists(Carbon::class)) {
             return Carbon::createFromTimestampUTC($ts);
         }
 
         return $ts;
-    }
-
-    public function toJson(): object
-    {
-        return json_decode(json_encode($this->claims));
     }
 }

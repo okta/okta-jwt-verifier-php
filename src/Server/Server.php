@@ -15,15 +15,13 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-namespace Okta\JwtVerifier\Discovery;
+namespace Okta\JwtVerifier\Server;
 
-interface DiscoveryMethod
+interface Server
 {
+    public function getMetaData(): object;
     /**
-     * Get the defined well-known URI.  This is the URI
-     * that is concatenated to the issuer URL.
-     *
-     * @return string
+     * @return string|array|object representing a set of keys
      */
-    public function getWellKnown(): string;
+    public function getKeys();
 }

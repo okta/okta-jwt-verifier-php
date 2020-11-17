@@ -15,7 +15,7 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-namespace Okta\JwtVerifier\Adaptors;
+namespace Okta\JwtVerifier\Adaptor;
 
 use Firebase\JWT\JWT as FirebaseJWT;
 use Okta\JwtVerifier\Jwt;
@@ -25,34 +25,15 @@ use UnexpectedValueException;
 class FirebasePhpJwt implements Adaptor
 {
     /**
-     * @var Request
-     */
-    private $request;
-
-    /**
      * Leeway in seconds
      *
      * @var int
      */
     private $leeway;
 
-    public function __construct(Request $request = null, int $leeway = 120)
+    public function __construct(int $leeway = 120)
     {
-        $this->request = $request ?: new Request();
         $this->leeway = $leeway;
-    }
-
-    public function getKeys($jku): array
-    {
-        $keys = json_decode($this->request->setUrl($jku)->get()->getBody()->getContents());
-        return self::parseKeySet($keys);
-    }
-
-    public function decode($jwt, $keys): Jwt
-    {
-        FirebaseJWT::$leeway = $this->leeway;
-        $decoded = (array)FirebaseJWT::decode($jwt, $keys, ['RS256']);
-        return (new Jwt($jwt, $decoded));
     }
 
     public static function isPackageAvailable(): bool
@@ -60,12 +41,14 @@ class FirebasePhpJwt implements Adaptor
         return class_exists(FirebaseJWT::class);
     }
 
-    /**
-     * Parse a set of JWK keys
-     * @param $source
-     * @return array an associative array represents the set of keys
-     */
-    public static function parseKeySet($source): array
+    public function decode(string $jwt, array $keys): Jwt
+    {
+        FirebaseJWT::$leeway = $this->leeway;
+        $decoded = (array)FirebaseJWT::decode($jwt, $keys, ['RS256']);
+        return (new Jwt($jwt, $decoded));
+    }
+
+    public function parseKeySet($source): array
     {
         $keys = [];
         if (is_string($source)) {
@@ -92,7 +75,7 @@ class FirebasePhpJwt implements Adaptor
                     }
                 }
                 try {
-                    $v = self::parseKey($v);
+                    $v = $this->parseKey($v);
                     $keys[$k] = $v;
                 } catch (UnexpectedValueException $e) {
                     //Do nothing
@@ -107,32 +90,24 @@ class FirebasePhpJwt implements Adaptor
         return $keys;
     }
 
-    /**
-     * Parse a JWK key
-     * @param $source
-     * @return resource|array an associative array represents the key
-     */
-    public static function parseKey($source)
+    public function parseKey($source)
     {
         if (!is_array($source)) {
             $source = (array)$source;
         }
         if (isset($source['kty'], $source['n'], $source['e'])) {
-            switch ($source['kty']) {
-                case 'RSA':
-                    if (array_key_exists('d', $source)) {
-                        throw new UnexpectedValueException('Failed to parse JWK: RSA private key is not supported');
-                    }
+            if ($source['kty'] === 'RSA') {
+                if (array_key_exists('d', $source)) {
+                    throw new UnexpectedValueException('Failed to parse JWK: RSA private key is not supported');
+                }
 
-                    $pem = self::createPemFromModulusAndExponent($source['n'], $source['e']);
-                    $pKey = openssl_pkey_get_public($pem);
-                    if ($pKey !== false) {
-                        return $pKey;
-                    }
-                    break;
-                default:
-                    //Currently only RSA is supported
-                    break;
+                $pem = self::createPemFromModulusAndExponent($source['n'], $source['e']);
+                $pKey = openssl_pkey_get_public($pem);
+                if ($pKey !== false) {
+                    return $pKey;
+                }
+            } else {
+                throw new UnexpectedValueException('Unsupported JWK, only RSA is currently supported.');
             }
         }
 
@@ -152,7 +127,6 @@ class FirebasePhpJwt implements Adaptor
         $modulus = FirebaseJWT::urlsafeB64Decode($n);
         $publicExponent = FirebaseJWT::urlsafeB64Decode($e);
 
-
         $components = array(
             'modulus' => pack('Ca*a*', 2, self::encodeLength(strlen($modulus)), $modulus),
             'publicExponent' => pack('Ca*a*', 2, self::encodeLength(strlen($publicExponent)), $publicExponent)
@@ -165,7 +139,6 @@ class FirebasePhpJwt implements Adaptor
             $components['modulus'],
             $components['publicExponent']
         );
-
 
         // sequence(oid(1.2.840.113549.1.1.1), null)) = rsaEncryption.
         $rsaOID = pack('H*', '300d06092a864886f70d0101010500'); // hex version of MA0GCSqGSIb3DQEBAQUA
@@ -203,6 +176,7 @@ class FirebasePhpJwt implements Adaptor
         }
 
         $temp = ltrim(pack('N', $length), chr(0));
+
         return pack('Ca*', 0x80 | strlen($temp), $temp);
     }
 }

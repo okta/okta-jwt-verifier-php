@@ -16,14 +16,17 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-use Okta\JwtVerifier\Discovery\DefaultDiscoveryMethod;
+namespace Test\Unit\Discovery;
+
+use Okta\JwtVerifier\Server\Discovery\DefaultDiscovery;
+use Test\BaseTestCase;
 
 class DefaultDiscoveryMethodTest extends BaseTestCase
 {
     /** @test */
     public function sets_well_known_correctly(): void
     {
-        $oauth = new DefaultDiscoveryMethod('test');
+        $oauth = new DefaultDiscovery('test');
 
         self::assertEquals(
             'test',

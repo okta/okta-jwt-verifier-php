@@ -15,7 +15,7 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-namespace Okta\JwtVerifier\Adaptors;
+namespace Okta\JwtVerifier\Adaptor;
 
 use RuntimeException;
 
@@ -28,14 +28,14 @@ class AutoDiscover
     public static function getAdaptor()
     {
         foreach (self::$adaptors as $adaptor) {
-            if ($adaptor instanceof Adaptor && $adaptor::isPackageAvailable()) {
+            if (is_a($adaptor, Adaptor::class, true) && $adaptor::isPackageAvailable()) {
                 return new $adaptor();
             }
         }
 
         throw new RuntimeException(
-            'Could not discover JWT Library,
-            Please make sure one is included and the Adaptor is used'
+            'Could not discover JWT Library, ' .
+            'Please make sure one is included and the Adaptor is used'
         );
     }
 }

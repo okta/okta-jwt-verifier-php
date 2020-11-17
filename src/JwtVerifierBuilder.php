@@ -18,9 +18,9 @@
 namespace Okta\JwtVerifier;
 
 use InvalidArgumentException;
-use Okta\JwtVerifier\Discovery\DiscoveryMethod;
-use Okta\JwtVerifier\Adaptors\Adaptor;
-use Bretterer\IsoDurationConverter\DurationParser;
+use Okta\JwtVerifier\Server\DefaultServer;
+use Okta\JwtVerifier\Server\Discovery\Discovery;
+use Okta\JwtVerifier\Adaptor\Adaptor;
 
 class JwtVerifierBuilder
 {
@@ -30,7 +30,7 @@ class JwtVerifierBuilder
     protected $issuer;
 
     /**
-     * @var DiscoveryMethod|null
+     * @var Discovery|null
      */
     protected $discovery;
 
@@ -59,11 +59,6 @@ class JwtVerifierBuilder
      */
     protected $nonce;
 
-    /**
-     * @var int
-     */
-    protected $leeway = 120;
-
     public function __construct(Request $request = null)
     {
         $this->request = $request;
@@ -85,10 +80,10 @@ class JwtVerifierBuilder
     /**
      * Set the Discovery class. This class should be an instance of DiscoveryMethod.
      *
-     * @param DiscoveryMethod $discoveryMethod The DiscoveryMethod instance.
+     * @param Discovery $discoveryMethod The DiscoveryMethod instance.
      * @return JwtVerifierBuilder
      */
-    public function setDiscovery(DiscoveryMethod $discoveryMethod): self
+    public function setDiscovery(Discovery $discoveryMethod): self
     {
         $this->discovery = $discoveryMethod;
 
@@ -130,24 +125,6 @@ class JwtVerifierBuilder
     }
 
     /**
-     * Set the leeway using ISO_8601 Duration string. ie: PT2M
-     *
-     * @param string $leeway ISO_8601 Duration format. Default: PT2M
-     * @return self
-     * @throws InvalidArgumentException
-     */
-    public function setLeeway(string $leeway = "PT2M"): self
-    {
-        if (strpos($leeway, "P") !== false) {
-            throw new InvalidArgumentException("It appears that the leeway provided is not in ISO_8601 Duration Format.  Please privide a duration in the format of `PT(n)S`");
-        }
-
-        $this->leeway = (int) (new DurationParser)->parse($leeway);
-
-        return $this;
-    }
-
-    /**
      * Build and return the JwtVerifier.
      *
      * @throws InvalidArgumentException
@@ -159,11 +136,12 @@ class JwtVerifierBuilder
         $this->validateClientId($this->clientId);
 
         return new JwtVerifier(
-            $this->issuer,
-            $this->discovery,
+            new DefaultServer(
+                $this->issuer,
+                $this->discovery,
+                $this->request
+            ),
             $this->adaptor,
-            $this->request,
-            $this->leeway,
             [
                 'nonce' => $this->nonce,
                 'audience' => $this->audience,

@@ -15,12 +15,28 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
+namespace Test\Unit;
+
 use Http\Mock\Client;
 use Okta\JwtVerifier\Request;
+use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Http\Message\ResponseInterface;
+use Test\BaseTestCase;
 
 class RequestTest extends BaseTestCase
 {
+    /**
+     * @var MockObject|ResponseInterface
+     */
+    protected $response;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->response = $this->createMock(ResponseInterface::class);
+    }
+
     /** @test */
     public function makes_request_to_correct_location(): void
     {

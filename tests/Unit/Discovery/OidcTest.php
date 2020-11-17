@@ -15,16 +15,19 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-use Okta\JwtVerifier\Discovery\Oidc;
+namespace Test\Unit\Discovery;
+
+use Okta\JwtVerifier\Server\Discovery\Oidc;
+use Test\BaseTestCase;
 
 class OidcTest extends BaseTestCase
 {
     /** @test */
-    public function sets_well_known_correctly()
+    public function sets_well_known_correctly(): void
     {
         $oauth = new Oidc();
 
-        $this->assertEquals(
+        self::assertEquals(
             '/.well-known/openid-configuration',
             $oauth->getWellKnown(),
             '.well-known endpoint is not set correctly'

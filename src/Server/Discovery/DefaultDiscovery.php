@@ -15,12 +15,19 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-namespace Okta\JwtVerifier\Discovery;
+namespace Okta\JwtVerifier\Server\Discovery;
 
-class Oidc implements DiscoveryMethod
+class DefaultDiscovery implements Discovery
 {
+    protected $wellKnown;
+
+    public function __construct(string $wellKnown)
+    {
+        $this->wellKnown = $wellKnown;
+    }
+
     public function getWellKnown(): string
     {
-        return '/.well-known/openid-configuration';
+        return $this->wellKnown;
     }
 }

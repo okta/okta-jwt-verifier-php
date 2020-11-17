@@ -18,27 +18,20 @@
 namespace Okta\JwtVerifier;
 
 use DomainException;
-use Okta\JwtVerifier\Adaptors\Adaptor;
-use Okta\JwtVerifier\Adaptors\AutoDiscover;
-use Okta\JwtVerifier\Discovery\DiscoveryMethod;
-use Okta\JwtVerifier\Discovery\Oauth;
+use Okta\JwtVerifier\Adaptor\Adaptor;
+use Okta\JwtVerifier\Adaptor\AutoDiscover;
+use Okta\JwtVerifier\Server\Server;
 
 class JwtVerifier
 {
-    /**
-     * @var string
-     */
-    protected $issuer;
+    public const VALIDATE_NONCE = 'nonce';
+    public const VALIDATE_AUDIENCE = 'audience';
+    public const VALIDATE_CLIENT_ID = 'client_id';
 
     /**
-     * @var DiscoveryMethod
+     * @var Server
      */
-    protected $discovery;
-
-    /**
-     * @var int
-     */
-    protected $leeway;
+    protected $server;
 
     /**
      * @var array
@@ -46,64 +39,35 @@ class JwtVerifier
     protected $claimsToValidate;
 
     /**
-     * @var string
-     */
-    protected $wellKnown;
-
-    /**
-     * @var mixed
-     */
-    protected $metaData;
-
-    /**
      * @var Adaptor
      */
     protected $adaptor;
 
     public function __construct(
-        string $issuer,
-        ?DiscoveryMethod $discovery = null,
+        Server $server,
         ?Adaptor $adaptor = null,
-        ?Request $request = null,
-        int $leeway = 120,
         array $claimsToValidate = []
     ) {
-        $this->issuer = $issuer;
-        $this->discovery = $discovery ?: new Oauth;
+        $this->server = $server;
         $this->adaptor = $adaptor ?: AutoDiscover::getAdaptor();
-        $request = $request ?: new Request;
-        $this->wellKnown = $this->issuer.$this->discovery->getWellKnown();
-        $this->metaData = json_decode(
-            $request->setUrl($this->wellKnown)->get()->getBody()
-        );
-        $this->leeway = $leeway;
         $this->claimsToValidate = $claimsToValidate;
     }
 
-    public function getIssuer(): string
+    public function getServer(): Server
     {
-        return $this->issuer;
+        return $this->server;
     }
 
-    public function getDiscovery(): DiscoveryMethod
+    public function getAdaptor(): Adaptor
     {
-        return $this->discovery;
-    }
-
-    public function getMetaData()
-    {
-        return $this->metaData;
+        return $this->adaptor;
     }
 
     public function verify($jwt): Jwt
     {
-        if ($this->metaData->jwks_uri === null) {
-            throw new DomainException("Could not access a valid JWKS_URI from the metadata.  We made a call to {$this->wellKnown} endpoint, but jwks_uri was null. Please make sure you are using a custom authorization server for the jwt verifier.");
-        }
+        $keys = $this->adaptor->parseKeySet($this->server->getKeys());
 
-        $keys = $this->adaptor->getKeys($this->metaData->jwks_uri);
-
-        $decoded =  $this->adaptor->decode($jwt, $keys);
+        $decoded = $this->adaptor->decode($jwt, $keys);
 
         $this->validateClaims($decoded->getClaims());
 
@@ -120,8 +84,8 @@ class JwtVerifier
     private function validateNonce($claims): void
     {
         if (isset($claims['nonce'])
-            && $this->claimsToValidate['nonce'] !== null
-            && $claims['nonce'] !== $this->claimsToValidate['nonce']
+            && $this->claimsToValidate[self::VALIDATE_NONCE] !== null
+            && $claims['nonce'] !== $this->claimsToValidate[self::VALIDATE_NONCE]
         ) {
             throw new DomainException(
                 'Nonce does not match what is expected. ' .
@@ -133,8 +97,8 @@ class JwtVerifier
     private function validateAudience($claims): void
     {
         if (isset($claims['aud'])
-            && $this->claimsToValidate['audience'] !== null
-            && $claims['aud'] !== $this->claimsToValidate['audience']
+            && $this->claimsToValidate[self::VALIDATE_AUDIENCE] !== null
+            && $claims['aud'] !== $this->claimsToValidate[self::VALIDATE_AUDIENCE]
         ) {
             throw new DomainException(
                 'Audience does not match what is expected. ' .
@@ -146,8 +110,8 @@ class JwtVerifier
     private function validateClientId($claims): void
     {
         if (isset($claims['cid'])
-            && $this->claimsToValidate['clientId'] !== null
-            && $claims['cid'] !== $this->claimsToValidate['clientId']
+            && $this->claimsToValidate[self::VALIDATE_CLIENT_ID] !== null
+            && $claims['cid'] !== $this->claimsToValidate[self::VALIDATE_CLIENT_ID]
         ) {
             throw new DomainException(
                 'ClientId does not match what is expected. ' .

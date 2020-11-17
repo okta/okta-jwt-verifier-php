@@ -15,11 +15,14 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-use Http\Mock\Client;
-use Okta\JwtVerifier\Adaptors\FirebasePhpJwt;
+namespace Test\Unit;
+
+use InvalidArgumentException;
+use Okta\JwtVerifier\Adaptor\Adaptor;
+use Okta\JwtVerifier\Server\Discovery\Oauth;
 use Okta\JwtVerifier\JwtVerifier;
 use Okta\JwtVerifier\JwtVerifierBuilder;
-use Okta\JwtVerifier\Request;
+use Test\BaseTestCase;
 
 class JwtVerifierBuilderTest extends BaseTestCase
 {
@@ -29,7 +32,7 @@ class JwtVerifierBuilderTest extends BaseTestCase
         $verifier = new JwtVerifierBuilder();
         self::assertInstanceOf(
             JwtVerifierBuilder::class,
-            $verifier->setIssuer('https://my.issuer.com'),
+            $verifier->setIssuer('issuer'),
             'Setting the issuer does not return self.'
         );
     }
@@ -40,57 +43,113 @@ class JwtVerifierBuilderTest extends BaseTestCase
         $verifier = new JwtVerifierBuilder();
         self::assertInstanceOf(
             JwtVerifierBuilder::class,
-            $verifier->setDiscovery(new \Okta\JwtVerifier\Discovery\Oauth()),
+            $verifier->setDiscovery($this->createMock(Oauth::class)),
             'Settings discovery does not return self.'
         );
     }
 
     /** @test */
-    public function building_the_jwt_verifier_throws_exception_if_issuer_not_set(): void
+    public function when_setting_adaptor_self_is_returned(): void
+    {
+        $verifier = new JwtVerifierBuilder();
+        self::assertInstanceOf(
+            JwtVerifierBuilder::class,
+            $verifier->setAdaptor($this->createMock(Adaptor::class)),
+            'Settings adaptor does not return self.'
+        );
+    }
+
+    /** @test */
+    public function when_setting_audience_self_is_returned(): void
+    {
+        $verifier = new JwtVerifierBuilder();
+        self::assertInstanceOf(
+            JwtVerifierBuilder::class,
+            $verifier->setAudience('test'),
+            'Settings audience does not return self.'
+        );
+    }
+
+    /** @test */
+    public function when_setting_client_id_self_is_returned(): void
+    {
+        $verifier = new JwtVerifierBuilder();
+        self::assertInstanceOf(
+            JwtVerifierBuilder::class,
+            $verifier->setClientId('test'),
+            'Settings client id does not return self.'
+        );
+    }
+
+    /** @test */
+    public function when_setting_nonce_id_self_is_returned(): void
+    {
+        $verifier = new JwtVerifierBuilder();
+        self::assertInstanceOf(
+            JwtVerifierBuilder::class,
+            $verifier->setNonce('test'),
+            'Settings nonce does not return self.'
+        );
+    }
+
+    /** @test */
+    public function build_throws_exception_if_issuer_not_set(): void
     {
         $this->expectException(InvalidArgumentException::class);
+        $this->expectErrorMessageMatches('~^Your Issuer is missing~');
         $verifier = new JwtVerifierBuilder();
         $verifier->build();
     }
 
     /** @test */
-    public function discovery_defaults_to_oauth_when_building(): void
+    public function build_throws_exception_if_issuer_does_not_start_with_https(): void
     {
-        $this->response
-            ->method('getBody')
-            ->willreturn('{"issuer": "https://example.com"}');
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectErrorMessageMatches('~^Your Issuer must start with https~');
+        $verifier = new JwtVerifierBuilder();
+        $verifier->setIssuer('http://test');
+        $verifier->build();
+    }
 
+    /** @test */
+    public function build_throws_exception_if_issuer_contains_replacement(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectErrorMessageMatches('~^Replace \{yourOktaDomain\} with your Okta domain~');
+        $verifier = new JwtVerifierBuilder();
+        $verifier->setIssuer('https://{yourOktaDomain}/');
+        $verifier->build();
+    }
 
-        $httpClient = new Client;
-        $httpClient->addResponse($this->response);
-        $request = new Request($httpClient);
+    /** @test */
+    public function build_throws_exception_if_client_id_not_set(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectErrorMessageMatches('~^Your client ID is missing~');
+        $verifier = new JwtVerifierBuilder();
+        $verifier->setIssuer('https://issuer/');
+        $verifier->build();
+    }
 
-        $verifier = new JwtVerifierBuilder($request);
-        $verifier = $verifier->setIssuer('https://my.issuer.com')->setClientId("abc123")
-            ->setAdaptor(new FirebasePhpJwt())->build();
-
-        self::assertInstanceOf(
-            \Okta\JwtVerifier\Discovery\Oauth::class,
-            $verifier->getDiscovery(),
-            'The builder is not defaulting to oauth2 discovery'
-        );
+    /** @test */
+    public function build_throws_exception_if_client_id_contains_replacement(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectErrorMessageMatches('~^Replace \{clientId\} with the client ID of your Application~');
+        $verifier = new JwtVerifierBuilder();
+        $verifier->setIssuer('https://issuer/');
+        $verifier->setClientId('this is my {clientId}');
+        $verifier->build();
     }
 
     /** @test */
     public function building_the_verifier_returns_instance_of_jwt_verifier(): void
     {
-        $this->response
-            ->method('getBody')
-            ->willreturn('{"issuer": "https://example.com"}');
-
-
-        $httpClient = new Client;
-        $httpClient->addResponse($this->response);
-        $request = new Request($httpClient);
-
-        $verifier = new JwtVerifierBuilder($request);
-        $verifier = $verifier->setIssuer('https://my.issuer.com')->setClientId("abc123")
-            ->setAdaptor(new FirebasePhpJwt())->build();
+        $builder = new JwtVerifierBuilder();
+        $verifier = $builder
+            ->setIssuer('https://my.issuer.com')
+            ->setClientId("abc123")
+            ->build();
 
         self::assertInstanceOf(
             JwtVerifier::class,
@@ -99,5 +158,19 @@ class JwtVerifierBuilderTest extends BaseTestCase
         );
     }
 
+    /** @test */
+    public function discovery_defaults_to_oauth_when_building(): void
+    {
+        $builder = new JwtVerifierBuilder();
+        $verifier = $builder
+            ->setIssuer('https://my.issuer.com')
+            ->setClientId("abc123")
+            ->build();
 
+        self::assertInstanceOf(
+            Oauth::class,
+            $verifier->getServer()->getDiscovery(),
+            'The builder is not defaulting to oauth2 discovery'
+        );
+    }
 }

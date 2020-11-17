@@ -15,16 +15,19 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-use Okta\JwtVerifier\Discovery\Oauth;
+namespace Test\Unit\Discovery;
+
+use Okta\JwtVerifier\Server\Discovery\Oauth;
+use Test\BaseTestCase;
 
 class OauthTest extends BaseTestCase
 {
     /** @test */
-    public function sets_well_known_correctly()
+    public function sets_well_known_correctly(): void
     {
         $oauth = new Oauth();
 
-        $this->assertEquals(
+        self::assertEquals(
             '/.well-known/oauth-authorization-server',
             $oauth->getWellKnown(),
             '.well-known endpoint is not set correctly'

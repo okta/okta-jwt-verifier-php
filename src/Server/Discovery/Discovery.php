@@ -15,12 +15,15 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-namespace Okta\JwtVerifier\Discovery;
+namespace Okta\JwtVerifier\Server\Discovery;
 
-class Oauth implements DiscoveryMethod
+interface Discovery
 {
-    public function getWellKnown(): string
-    {
-        return '/.well-known/oauth-authorization-server';
-    }
+    /**
+     * Get the defined well-known URI.  This is the URI
+     * that is concatenated to the issuer URL.
+     *
+     * @return string
+     */
+    public function getWellKnown(): string;
 }

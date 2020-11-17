@@ -15,13 +15,12 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-namespace Okta\JwtVerifier\Adaptors;
+namespace Okta\JwtVerifier\Server\Discovery;
 
-use Okta\JwtVerifier\Jwt;
-
-interface Adaptor
+class Oauth implements Discovery
 {
-    public function getKeys($jku);
-    public function decode($jwt, $keys): Jwt;
-    public static function isPackageAvailable(): bool;
+    public function getWellKnown(): string
+    {
+        return '/.well-known/oauth-authorization-server';
+    }
 }

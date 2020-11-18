@@ -15,25 +15,15 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-namespace Okta\JwtVerifier\Adaptors;
+namespace Okta\JwtVerifier\Server\Discovery;
 
-class AutoDiscover
+interface Discovery
 {
-    private static $adaptors = [
-        FirebasePhpJwt::class
-    ];
-
-    public static function getAdaptor()
-    {
-        foreach(self::$adaptors as $adaptor) {
-            if($adaptor::isPackageAvailable()) {
-                return new $adaptor();
-            }
-        }
-
-        throw new \Exception(
-            'Could not discover JWT Library,
-            Please make sure one is included and the Adaptor is used'
-        );
-    }
+    /**
+     * Get the defined well-known URI.  This is the URI
+     * that is concatenated to the issuer URL.
+     *
+     * @return string
+     */
+    public function getWellKnown(): string;
 }

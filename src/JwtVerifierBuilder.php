@@ -17,21 +17,47 @@
 
 namespace Okta\JwtVerifier;
 
-use Okta\JwtVerifier\Discovery\Oauth;
-use Okta\JwtVerifier\Adaptors\Adaptor;
-use Okta\JwtVerifier\Discovery\DiscoveryMethod;
-use Bretterer\IsoDurationConverter\DurationParser;
+use InvalidArgumentException;
+use Okta\JwtVerifier\Server\DefaultServer;
+use Okta\JwtVerifier\Server\Discovery\Discovery;
+use Okta\JwtVerifier\Adaptor\Adaptor;
 
 class JwtVerifierBuilder
 {
+    /**
+     * @var string|null
+     */
     protected $issuer;
+
+    /**
+     * @var Discovery|null
+     */
     protected $discovery;
+
+    /**
+     * @var Request|null
+     */
     protected $request;
+
+    /**
+     * @var Adaptor|null
+     */
     protected $adaptor;
+
+    /**
+     * @var string|null
+     */
     protected $audience;
+
+    /**
+     * @var string|null
+     */
     protected $clientId;
+
+    /**
+     * @var string|null
+     */
     protected $nonce;
-    protected $leeway = 120;
 
     public function __construct(Request $request = null)
     {
@@ -54,10 +80,10 @@ class JwtVerifierBuilder
     /**
      * Set the Discovery class. This class should be an instance of DiscoveryMethod.
      *
-     * @param DiscoveryMethod $discoveryMethod The DiscoveryMethod instance.
+     * @param Discovery $discoveryMethod The DiscoveryMethod instance.
      * @return JwtVerifierBuilder
      */
-    public function setDiscovery(DiscoveryMethod $discoveryMethod): self
+    public function setDiscovery(Discovery $discoveryMethod): self
     {
         $this->discovery = $discoveryMethod;
 
@@ -77,21 +103,21 @@ class JwtVerifierBuilder
         return $this;
     }
 
-    public function setAudience($audience)
+    public function setAudience(string $audience): self
     {
         $this->audience = $audience;
 
         return $this;
     }
 
-    public function setClientId($clientId)
+    public function setClientId(string $clientId): self
     {
         $this->clientId = $clientId;
 
         return $this;
     }
 
-    public function setNonce($nonce)
+    public function setNonce(string $nonce): self
     {
         $this->nonce = $nonce;
 
@@ -99,42 +125,23 @@ class JwtVerifierBuilder
     }
 
     /**
-     * Set the leeway using ISO_8601 Duration string. ie: PT2M
-     *
-     * @param string $leeway ISO_8601 Duration format. Default: PT2M
-     * @return self
-     * @throws \InvalidArgumentException
-     */
-    public function setLeeway(string $leeway = "PT2M"): self
-    {
-        if(strstr($leeway, "P")) {
-            throw new \InvalidArgumentException("It appears that the leeway provided is not in ISO_8601 Duration Format.  Please privide a duration in the format of `PT(n)S`");
-        }
-
-        $leeway = (new DurationParser)->parse($leeway);
-        $this->leeway = $leeway;
-
-        return $this;
-    }
-
-    /**
      * Build and return the JwtVerifier.
      *
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      * @return JwtVerifier
      */
     public function build(): JwtVerifier
     {
         $this->validateIssuer($this->issuer);
-
         $this->validateClientId($this->clientId);
 
         return new JwtVerifier(
-            $this->issuer,
-            $this->discovery,
+            new DefaultServer(
+                $this->issuer,
+                $this->discovery,
+                $this->request
+            ),
             $this->adaptor,
-            $this->request,
-            $this->leeway,
             [
                 'nonce' => $this->nonce,
                 'audience' => $this->audience,
@@ -146,38 +153,38 @@ class JwtVerifierBuilder
     /**
      * Validate the issuer
      *
-     * @param string $issuer
-     * @throws \InvalidArgumentException
+     * @param string|null $issuer
+     * @throws InvalidArgumentException
      * @return void
      */
-    private function validateIssuer($issuer): void {
-        if (null === $issuer || "" == $issuer) {
-            throw new \InvalidArgumentException("Your Issuer is missing. You can find your issuer from your authorization server settings in the Okta Developer Console. Find out more information aobut Authorization Servers at https://developer.okta.com/docs/guides/customize-authz-server/overview/");
+    private function validateIssuer(?string $issuer): void {
+        if (null === $issuer || "" === $issuer) {
+            throw new InvalidArgumentException("Your Issuer is missing. You can find your issuer from your authorization server settings in the Okta Developer Console. Find out more information aobut Authorization Servers at https://developer.okta.com/docs/guides/customize-authz-server/overview/");
         }
 
-        if (strstr($issuer, "https://") == false) {
-            throw new \InvalidArgumentException("Your Issuer must start with https. Current value: {$issuer}. You can copy your issuer from your authorization server settings in the Okta Developer Console. Find out more information aobut Authorization Servers at https://developer.okta.com/docs/guides/customize-authz-server/overview/");
+        if (strpos($issuer, "https://") === false) {
+            throw new InvalidArgumentException("Your Issuer must start with https. Current value: {$issuer}. You can copy your issuer from your authorization server settings in the Okta Developer Console. Find out more information aobut Authorization Servers at https://developer.okta.com/docs/guides/customize-authz-server/overview/");
         }
 
-        if (strstr($issuer, "{yourOktaDomain}") != false) {
-            throw new \InvalidArgumentException("Replace {yourOktaDomain} with your Okta domain. You can copy your domain from the Okta Developer Console. Follow these instructions to find it: https://bit.ly/finding-okta-domain");
+        if (strpos($issuer, "{yourOktaDomain}") !== false) {
+            throw new InvalidArgumentException("Replace {yourOktaDomain} with your Okta domain. You can copy your domain from the Okta Developer Console. Follow these instructions to find it: https://bit.ly/finding-okta-domain");
         }
     }
 
     /**
      * Validate the client id
      *
-     * @param string $cid
-     * @throws \InvalidArgumentException
+     * @param string|null $cid
+     * @throws InvalidArgumentException
      * @return void
      */
-    private function validateClientId($cid): void {
-        if (null === $cid || "" == $cid) {
-            throw new \InvalidArgumentException("Your client ID is missing. You can copy it from the Okta Developer Console in the details for the Application you created. Follow these instructions to find it: https://bit.ly/finding-okta-app-credentials");
+    private function validateClientId(?string $cid): void {
+        if (null === $cid || "" === $cid) {
+            throw new InvalidArgumentException("Your client ID is missing. You can copy it from the Okta Developer Console in the details for the Application you created. Follow these instructions to find it: https://bit.ly/finding-okta-app-credentials");
         }
 
-        if (strstr($cid, "{clientId}") != false) {
-            throw new \InvalidArgumentException("Replace {clientId} with the client ID of your Application. You can copy it from the Okta Developer Console in the details for the Application you created. Follow these instructions to find it: https://bit.ly/finding-okta-app-credentials");
+        if (strpos($cid, "{clientId}") !== false) {
+            throw new InvalidArgumentException("Replace {clientId} with the client ID of your Application. You can copy it from the Okta Developer Console in the details for the Application you created. Follow these instructions to find it: https://bit.ly/finding-okta-app-credentials");
         }
     }
 }

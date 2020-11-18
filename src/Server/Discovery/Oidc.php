@@ -1,5 +1,4 @@
 <?php
-
 /******************************************************************************
  * Copyright 2017 Okta, Inc.                                                  *
  *                                                                            *
@@ -16,10 +15,12 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-namespace Test;
+namespace Okta\JwtVerifier\Server\Discovery;
 
-use PHPUnit\Framework\TestCase;
-
-class BaseTestCase extends TestCase
+class Oidc implements Discovery
 {
+    public function getWellKnown(): string
+    {
+        return '/.well-known/openid-configuration';
+    }
 }

@@ -17,55 +17,72 @@
 
 namespace Okta\JwtVerifier;
 
+use Carbon\Carbon;
+use Carbon\CarbonInterface;
+
 class Jwt
 {
-    public function __construct(
-        string $jwt,
-        array $claims
-    )
+    /**
+     * @var string
+     */
+    private $token;
+
+    /**
+     * @var array
+     */
+    private $claims;
+
+    public function __construct(string $jwt, array $claims)
     {
-        $this->jwt = $jwt;
+        $this->token = $jwt;
         $this->claims = $claims;
     }
 
-    public function getJwt()
+    public function getToken(): string
     {
-        return $this->jwt;
+        return $this->token;
     }
 
-    public function getClaims()
+    public function getClaims(): array
     {
         return $this->claims;
     }
 
+    /**
+     * @param bool $carbonInstance
+     * @return CarbonInterface|int
+     */
     public function getExpirationTime($carbonInstance = true)
     {
-        $ts = $this->toJson()->exp;
-        if(class_exists(\Carbon\Carbon::class) && $carbonInstance) {
-            return \Carbon\Carbon::createFromTimestampUTC($ts);
+        if (!isset($this->claims['exp'])) {
+            throw new \DomainException('JWT does not contain "exp" claim');
+        }
+
+        $ts = $this->claims['exp'];
+
+        if ($carbonInstance && class_exists(Carbon::class)) {
+            return Carbon::createFromTimestampUTC($ts);
         }
 
         return $ts;
     }
 
+    /**
+     * @param bool $carbonInstance
+     * @return CarbonInterface|int
+     */
     public function getIssuedAt($carbonInstance = true)
     {
-        $ts = $this->toJson()->iat;
-        if(class_exists(\Carbon\Carbon::class) && $carbonInstance) {
-            return \Carbon\Carbon::createFromTimestampUTC($ts);
+        if (!isset($this->claims['iat'])) {
+            throw new \DomainException('JWT does not contain "iat" claim');
+        }
+
+        $ts = $this->claims['iat'];
+
+        if ($carbonInstance && class_exists(Carbon::class)) {
+            return Carbon::createFromTimestampUTC($ts);
         }
 
         return $ts;
     }
-
-    public function toJson()
-    {
-        if(is_resource($this->claims)) {
-            throw new \InvalidArgumentException('Could not convert to JSON');
-        }
-
-        return json_decode(json_encode($this->claims));
-
-    }
-
 }

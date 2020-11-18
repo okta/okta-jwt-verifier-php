@@ -20,18 +20,28 @@ namespace Okta\JwtVerifier;
 use Http\Client\Common\PluginClient;
 use Http\Client\HttpClient;
 use Http\Discovery\HttpClientDiscovery;
-use Http\Discovery\MessageFactoryDiscovery;
-use Http\Discovery\UriFactoryDiscovery;
-use Http\Message\MessageFactory;
-use Http\Message\UriFactory;
+use Http\Discovery\Psr17FactoryDiscovery;
+use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\UriFactoryInterface;
 use Psr\Http\Message\UriInterface;
 
 class Request
 {
+    /**
+     * @var PluginClient
+     */
     protected $httpClient;
+
+    /**
+     * @var UriFactoryInterface
+     */
     protected $uriFactory;
-    protected $messageFactory;
+
+    /**
+     * @var RequestFactoryInterface
+     */
+    protected $requestFactory;
 
     /**
      * The UriInterface of the request to be made.
@@ -49,15 +59,14 @@ class Request
 
     public function __construct(
         HttpClient $httpClient = null,
-        UriFactory $uriFactory = null,
-        MessageFactory $messageFactory = null
+        UriFactoryInterface $uriFactory = null,
+        RequestFactoryInterface $messageFactory = null
     ) {
         $this->httpClient = new PluginClient(
             $httpClient ?: HttpClientDiscovery::find()
         );
-
-        $this->uriFactory = $uriFactory ?: UriFactoryDiscovery::find();
-        $this->messageFactory = $messageFactory ?: MessageFactoryDiscovery::find();
+        $this->uriFactory = $uriFactory ?: Psr17FactoryDiscovery::findUrlFactory();
+        $this->requestFactory = $messageFactory ?: Psr17FactoryDiscovery::findRequestFactory();
     }
 
     public function setUrl($url): Request
@@ -80,18 +89,14 @@ class Request
 
     protected function request($method): ResponseInterface
     {
-        $headers = [];
-        $headers['Accept'] = 'application/json';
-
         if (!empty($this->query)) {
             $this->url = $this->url->withQuery(http_build_query($this->query));
         }
 
-        $request = $this->messageFactory->createRequest($method, $this->url, $headers);
+        $request = $this->requestFactory->createRequest($method, $this->url);
+        $request->withHeader('Accept', 'application/json');
 
         return $this->httpClient->sendRequest($request);
 
     }
-
-
 }

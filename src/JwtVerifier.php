@@ -17,27 +17,21 @@
 
 namespace Okta\JwtVerifier;
 
-use Http\Client\Common\PluginClient;
-use Http\Client\HttpClient;
-use Http\Discovery\HttpClientDiscovery;
-use Http\Discovery\MessageFactoryDiscovery;
-use Http\Discovery\UriFactoryDiscovery;
-use Okta\JwtVerifier\Adaptors\Adaptor;
-use Okta\JwtVerifier\Adaptors\AutoDiscover;
-use Okta\JwtVerifier\Discovery\DiscoveryMethod;
-use Okta\JwtVerifier\Discovery\Oauth;
+use DomainException;
+use Okta\JwtVerifier\Adaptor\Adaptor;
+use Okta\JwtVerifier\Adaptor\AutoDiscover;
+use Okta\JwtVerifier\Server\Server;
 
 class JwtVerifier
 {
-    /**
-     * @var string
-     */
-    protected $issuer;
+    public const VALIDATE_NONCE = 'nonce';
+    public const VALIDATE_AUDIENCE = 'audience';
+    public const VALIDATE_CLIENT_ID = 'client_id';
 
     /**
-     * @var DiscoveryMethod
+     * @var Server
      */
-    protected $discovery;
+    protected $server;
 
     /**
      * @var array
@@ -45,109 +39,84 @@ class JwtVerifier
     protected $claimsToValidate;
 
     /**
-     * @var string
-     */
-    protected $wellknown;
-
-    /**
-     * @var mixed
-     */
-    protected $metaData;
-
-    /**
      * @var Adaptor
      */
     protected $adaptor;
 
     public function __construct(
-        string $issuer,
-        DiscoveryMethod $discovery = null,
-        Adaptor $adaptor = null,
-        Request $request = null,
-        int $leeway = 120,
+        Server $server,
+        ?Adaptor $adaptor = null,
         array $claimsToValidate = []
     ) {
-        $this->issuer = $issuer;
-        $this->discovery = $discovery ?: new Oauth;
+        $this->server = $server;
         $this->adaptor = $adaptor ?: AutoDiscover::getAdaptor();
-        $request = $request ?: new Request;
-        $this->wellknown = $this->issuer.$this->discovery->getWellKnown();
-        $this->metaData = json_decode($request->setUrl($this->wellknown)->get()
-            ->getBody());
-
         $this->claimsToValidate = $claimsToValidate;
     }
 
-    public function getIssuer()
+    public function getServer(): Server
     {
-        return $this->issuer;
+        return $this->server;
     }
 
-    public function getDiscovery()
+    public function getAdaptor(): Adaptor
     {
-        return $this->discovery;
+        return $this->adaptor;
     }
 
-    public function getMetaData()
+    public function verify($jwt): Jwt
     {
-        return $this->metaData;
-    }
+        $keys = $this->adaptor->parseKeySet($this->server->getKeys());
 
-    public function verify($jwt)
-    {
-        if($this->metaData->jwks_uri == null) {
-            throw new \DomainException("Could not access a valid JWKS_URI from the metadata.  We made a call to {$this->wellknown} endpoint, but jwks_uri was null. Please make sure you are using a custom authorization server for the jwt verifier.");
-        }
-
-        $keys = $this->adaptor->getKeys($this->metaData->jwks_uri);
-
-        $decoded =  $this->adaptor->decode($jwt, $keys);
+        $decoded = $this->adaptor->decode($jwt, $keys);
 
         $this->validateClaims($decoded->getClaims());
 
         return $decoded;
     }
 
-    private function validateClaims(array $claims)
+    private function validateClaims(array $claims): void
     {
         $this->validateNonce($claims);
         $this->validateAudience($claims);
         $this->validateClientId($claims);
     }
 
-    private function validateNonce($claims)
+    private function validateNonce($claims): void
     {
-        if(!isset($claims['nonce']) && $this->claimsToValidate['nonce'] == null) {
-            return false;
-        }
-
-        if($claims['nonce'] != $this->claimsToValidate['nonce']) {
-            throw new \Exception('Nonce does not match what is expected. Make sure to provide the nonce with
-            `setNonce()` from the JwtVerifierBuilder.');
+        if (isset($claims['nonce'])
+            && $this->claimsToValidate[self::VALIDATE_NONCE] !== null
+            && $claims['nonce'] !== $this->claimsToValidate[self::VALIDATE_NONCE]
+        ) {
+            throw new DomainException(
+                'Nonce does not match what is expected. ' .
+                'Make sure to provide the nonce with `setNonce()` from the JwtVerifierBuilder.'
+            );
         }
     }
 
-    private function validateAudience($claims)
+    private function validateAudience($claims): void
     {
-        if(!isset($claims['aud']) && $this->claimsToValidate['audience'] == null) {
-            return false;
-        }
-
-        if($claims['aud'] != $this->claimsToValidate['audience']) {
-            throw new \Exception('Audience does not match what is expected. Make sure to provide the audience with
-            `setAudience()` from the JwtVerifierBuilder.');
+        if (isset($claims['aud'])
+            && $this->claimsToValidate[self::VALIDATE_AUDIENCE] !== null
+            && $claims['aud'] !== $this->claimsToValidate[self::VALIDATE_AUDIENCE]
+        ) {
+            throw new DomainException(
+                'Audience does not match what is expected. ' .
+                'Make sure to provide the audience with `setAudience()` from the JwtVerifierBuilder.'
+            );
         }
     }
 
-    private function validateClientId($claims)
+    private function validateClientId($claims): void
     {
-        if(!isset($claims['cid']) && $this->claimsToValidate['clientId'] == null) {
-            return false;
-        }
-
-        if($claims['cid'] != $this->claimsToValidate['clientId']) {
-            throw new \Exception('ClientId does not match what is expected. Make sure to provide the client id with
-            `setClientId()` from the JwtVerifierBuilder.');
+        if (isset($claims['cid'])
+            && $this->claimsToValidate[self::VALIDATE_CLIENT_ID] !== null
+            && $claims['cid'] !== $this->claimsToValidate[self::VALIDATE_CLIENT_ID]
+        ) {
+            throw new DomainException(
+                'ClientId does not match what is expected. ' .
+                'Make sure to provide the client id with `setClientId()` from the JwtVerifierBuilder.'
+            );
         }
     }
 }

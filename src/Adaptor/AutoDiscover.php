@@ -15,24 +15,27 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-namespace Okta\JwtVerifier\Discovery;
+namespace Okta\JwtVerifier\Adaptor;
 
-use Okta\JwtVerifier\Discovery\DiscoveryMethod as Discovery;
+use RuntimeException;
 
-class Oidc extends Discovery
+class AutoDiscover
 {
+    private static $adaptors = [
+        FirebasePhpJwt::class
+    ];
 
-    protected $wellKnownUri = '/.well-known/openid-configuration';
-
-    /**
-     * Get the defined well-known URI.  This is the URI
-     * that is concatenated to the issuer URL.
-     *
-     * @return string
-     */
-    public function getWellKnownUri(): string
+    public static function getAdaptor()
     {
-        return $this->wellKnownUri;
-    }
+        foreach (self::$adaptors as $adaptor) {
+            if (is_a($adaptor, Adaptor::class, true) && $adaptor::isPackageAvailable()) {
+                return new $adaptor();
+            }
+        }
 
+        throw new RuntimeException(
+            'Could not discover JWT Library, ' .
+            'Please make sure one is included and the Adaptor is used'
+        );
+    }
 }

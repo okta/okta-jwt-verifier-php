@@ -57,8 +57,8 @@ To validate a JWT, you will need a few different items:
 require_once("/vendor/autoload.php"); // This should be replaced with your path to your vendor/autoload.php file
 
 $jwtVerifier = (new \Okta\JwtVerifier\JwtVerifierBuilder())
-    ->setDiscovery(new \Okta\JwtVerifier\Discovery\Oauth) // This is not needed if using oauth.  The other option is `new \Okta\JwtVerifier\Discovery\OIDC`
-    ->setAdaptor(new \Okta\JwtVerifier\Adaptors\FirebasePhpJwt)
+    ->setDiscovery(new \Okta\JwtVerifier\Server\Discovery\Oauth) // This is not needed if using oauth.  The other option is `new \Okta\JwtVerifier\Server\Discovery\OIDC`
+    ->setAdaptor(new \Okta\JwtVerifier\Adaptor\FirebasePhpJwt)
     ->setAudience('api://default')
     ->setClientId('{clientId}')
     ->setIssuer('https://{yourOktaDomain}.com/oauth2/default')
@@ -87,8 +87,6 @@ The result from the verify method is a `Jwt` object which has a few helper metho
 ```php
 dump($jwt); //Returns instance of \Okta\JwtVerifier\JWT
 
-dump($jwt->toJson()); // Returns Claims as JSON Object
-
 dump($jwt->getClaims()); // Returns Claims as they come from the JWT Package used
 
 dump($jwt->getIssuedAt()); // returns Carbon instance of issued at time
@@ -111,6 +109,16 @@ If you run into problems using the SDK, you can
 The above are the basic steps for verifying an access token locally. The steps are not tied directly to a framework so
 you could plug in the `okta/okta-jwt` into the framework of your choice.
 
+## Development
+
+The repository contains a `Dockerfile` you can use to run the test suite locally:
+
+```bash
+# build the docker
+docker build -t okta-jwt-verifier .
+# run the tests
+docker run --rm --volume "$PWD":/app okta-jwt-verifier vendor/bin/phpunit
+```
 
 [devforum]: https://devforum.okta.com/
 [lang-landing]: https://developer.okta.com/code/php/

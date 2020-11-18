@@ -1,5 +1,4 @@
 <?php
-
 /******************************************************************************
  * Copyright 2017 Okta, Inc.                                                  *
  *                                                                            *
@@ -16,10 +15,26 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-namespace Test;
+namespace Okta\JwtVerifier\Adaptor;
 
-use PHPUnit\Framework\TestCase;
+use Okta\JwtVerifier\Jwt;
 
-class BaseTestCase extends TestCase
+interface Adaptor
 {
+    /**
+     * Parse a set of JWK keys
+     *
+     * @param string|object|array $source
+     * @return array an associative array represents the set of keys
+     */
+    public function parseKeySet($source): array;
+
+    /**
+     * @param string $jwt
+     * @param array $keys a parsed set of keys
+     * @return Jwt
+     */
+    public function decode(string $jwt, array $keys): Jwt;
+
+    public static function isPackageAvailable(): bool;
 }

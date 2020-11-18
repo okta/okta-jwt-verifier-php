@@ -1,5 +1,4 @@
 <?php
-
 /******************************************************************************
  * Copyright 2017 Okta, Inc.                                                  *
  *                                                                            *
@@ -16,10 +15,23 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-namespace Test;
+namespace Test\Unit\Discovery;
 
-use PHPUnit\Framework\TestCase;
+use Okta\JwtVerifier\Server\Discovery\Oidc;
+use Test\BaseTestCase;
 
-class BaseTestCase extends TestCase
+class OidcTest extends BaseTestCase
 {
+    /** @test */
+    public function sets_well_known_correctly(): void
+    {
+        $oauth = new Oidc();
+
+        self::assertEquals(
+            '/.well-known/openid-configuration',
+            $oauth->getWellKnown(),
+            '.well-known endpoint is not set correctly'
+        );
+    }
+
 }

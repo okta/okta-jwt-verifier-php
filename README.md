@@ -65,14 +65,14 @@ $jwtVerifier = (new \Okta\JwtVerifier\JwtVerifierBuilder())
     ->build();
 ```
 
-## Validating a JWT
+## Validating an Access Token
 
 After you have a `$jwtVerifier` from the above section and an `access_token` from a successful sign in, or
 from a `Bearer token` in the authorization header, you will need to make sure that it is still valid.
-All you need to do is call the `decode` method (where `$jwtString` is your access token in string format).
+All you need to do is call the `verifyAccessToken` method (where `$jwtString` is your access token in string format).
 
 ```php
-$jwt = $jwtVerifier->verify($jwtString);
+$jwt = $jwtVerifier->verifyAccessToken($jwtString);
 ```
 
 This will validate your JWT for the following:
@@ -97,6 +97,34 @@ dump($jwt->getIssuedAt(false)); // returns timestamp of issued at time
 dump($jwt->getExpirationTime()); //returns Carbon instance of Expiration Time
 dump($jwt->getExpirationTime(false)); //returns timestamp of Expiration Time
 ```
+
+## Validating an Id Token
+
+```php
+$jwt = $jwtVerifier->verifyIdToken($jwtString);
+```
+
+This will validate your JWT for the following:
+
+- token expiration time
+- the time it was issue at
+- that the token issuer matches the expected value passed into the above helper
+- that the token audience matches the expected value passed into the above helper
+
+The result from the verify method is a `Jwt` object which has a few helper methods for you:
+
+```php
+dump($jwt); //Returns instance of \Okta\JwtVerifier\JWT
+
+dump($jwt->toJson()); // Returns Claims as JSON Object
+
+dump($jwt->getClaims()); // Returns Claims as they come from the JWT Package used
+
+dump($jwt->getIssuedAt()); // returns Carbon instance of issued at time
+dump($jwt->getIssuedAt(false)); // returns timestamp of issued at time
+
+dump($jwt->getExpirationTime()); //returns Carbon instance of Expiration Time
+dump($jwt->getExpirationTime(false)); //returns timestamp of Expiration Time
 
 ## Need help?
 

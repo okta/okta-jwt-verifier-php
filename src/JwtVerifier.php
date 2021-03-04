@@ -103,7 +103,7 @@ class JwtVerifier
 
         $decoded =  $this->adaptor->decode($jwt, $keys);
 
-        $this->validateClaims($decoded->getClaims());
+        $this->validateClaims($decoded->getClaims(), "access"); // This is hard coded to access token since this was the original functionality.
 
         return $decoded;
     }

@@ -24,7 +24,7 @@ use Http\Discovery\MessageFactoryDiscovery;
 use Http\Discovery\UriFactoryDiscovery;
 use Okta\JwtVerifier\Adaptors\Adaptor;
 use Okta\JwtVerifier\Adaptors\AutoDiscover;
-use Okta\JwtVerifier\Discovery\DiscoveryMethod;
+use Okta\JwtVerifier\Discovery\DiscoveryMethodInterface;
 use Okta\JwtVerifier\Discovery\Oauth;
 
 class JwtVerifier
@@ -35,7 +35,7 @@ class JwtVerifier
     protected $issuer;
 
     /**
-     * @var DiscoveryMethod
+     * @var DiscoveryMethodInterface
      */
     protected $discovery;
 
@@ -61,7 +61,7 @@ class JwtVerifier
 
     public function __construct(
         string $issuer,
-        DiscoveryMethod $discovery = null,
+        DiscoveryMethodInterface $discovery = null,
         Adaptor $adaptor = null,
         Request $request = null,
         int $leeway = 120,
@@ -72,8 +72,9 @@ class JwtVerifier
         $this->adaptor = $adaptor ?: AutoDiscover::getAdaptor();
         $request = $request ?: new Request;
         $this->wellknown = $this->issuer.$this->discovery->getWellKnown();
-        $this->metaData = json_decode($request->setUrl($this->wellknown)->get()
-            ->getBody());
+        $this->metaData = json_decode(
+            $request->setUrl($this->wellknown)->get()->getBody()
+        );
 
         $this->claimsToValidate = $claimsToValidate;
     }

@@ -17,9 +17,8 @@
 
 namespace Okta\JwtVerifier;
 
-use Okta\JwtVerifier\Discovery\Oauth;
+use Okta\JwtVerifier\Discovery\DiscoveryMethodInterface;
 use Okta\JwtVerifier\Adaptors\Adaptor;
-use Okta\JwtVerifier\Discovery\DiscoveryMethod;
 use Bretterer\IsoDurationConverter\DurationParser;
 
 class JwtVerifierBuilder
@@ -54,10 +53,10 @@ class JwtVerifierBuilder
     /**
      * Set the Discovery class. This class should be an instance of DiscoveryMethod.
      *
-     * @param DiscoveryMethod $discoveryMethod The DiscoveryMethod instance.
+     * @param DiscoveryMethodInterface $discoveryMethod The DiscoveryMethod instance.
      * @return JwtVerifierBuilder
      */
-    public function setDiscovery(DiscoveryMethod $discoveryMethod): self
+    public function setDiscovery(DiscoveryMethodInterface $discoveryMethod): self
     {
         $this->discovery = $discoveryMethod;
 

@@ -17,12 +17,8 @@
 
 namespace Okta\JwtVerifier\Discovery;
 
-use Okta\JwtVerifier\Discovery\DiscoveryMethod as Discovery;
-
-class Oidc extends Discovery
+class Oidc implements DiscoveryMethodInterface
 {
-
-    protected $wellKnownUri = '/.well-known/openid-configuration';
 
     /**
      * Get the defined well-known URI.  This is the URI
@@ -30,9 +26,9 @@ class Oidc extends Discovery
      *
      * @return string
      */
-    public function getWellKnownUri(): string
+    public function getWellKnown(): string
     {
-        return $this->wellKnownUri;
+        return '/.well-known/openid-configuration';
     }
 
 }

@@ -20,7 +20,7 @@
         "psr/http-message": "^1.0",
         "php-http/client-common": "^2.3",
         "php-http/httplug": "^2.2",
-        "php-http/message": "^1.8",
+        "php-http/message": "^1.11",
         "php-http/discovery": "^1.9",
         "php-http/curl-client": "^2.1",
         "bretterer/iso_duration_converter": "^0.1.0"

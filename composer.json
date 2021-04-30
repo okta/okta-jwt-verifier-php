@@ -23,8 +23,7 @@
         "php-http/message": "^1.8",
         "php-http/discovery": "^1.9",
         "php-http/curl-client": "^2.1",
-        "bretterer/iso_duration_converter": "^0.1.0",
-        "nyholm/psr7": "dev-master"
+        "bretterer/iso_duration_converter": "^0.1.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^7.0 | ^8.0 ",

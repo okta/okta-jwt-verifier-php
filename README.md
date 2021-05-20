@@ -125,7 +125,7 @@ dump($jwt->getIssuedAt(false)); // returns timestamp of issued at time
 
 dump($jwt->getExpirationTime()); //returns Carbon instance of Expiration Time
 dump($jwt->getExpirationTime(false)); //returns timestamp of Expiration Time
-
+```
 ## Need help?
 
 If you run into problems using the SDK, you can

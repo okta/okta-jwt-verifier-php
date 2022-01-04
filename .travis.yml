@@ -24,4 +24,4 @@ matrix:
       env:
         - COVERAGE=true
     - php: 8.0
-    - php: 8.1
+    - php: 8.1.0 #Must have 8.1.0 instead of 8.1 (See: https://travis-ci.community/t/php-8-1-support/12439)

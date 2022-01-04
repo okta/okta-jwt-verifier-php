@@ -24,3 +24,4 @@ matrix:
       env:
         - COVERAGE=true
     - php: 8.0
+    - php: 8.1

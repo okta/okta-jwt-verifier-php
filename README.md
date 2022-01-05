@@ -20,7 +20,7 @@ This library uses semantic versioning and follows Okta's [library version policy
 | 0.x     |  :warning: Beta Release (Retired)  |
 | 1.x     |  :heavy_check_mark: Release        |
 
-The latest release can always be found on the [releases page][github-releases].
+The latest release can always be found on the [releases page](https://github.com/okta/okta-jwt-verifier-php/releases).
 
 ## Installation
 The Okta JWT Verifier can be installed through composer.

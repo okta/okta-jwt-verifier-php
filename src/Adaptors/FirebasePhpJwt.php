@@ -17,7 +17,9 @@
 
 namespace Okta\JwtVerifier\Adaptors;
 
+use Carbon\Carbon;
 use Firebase\JWT\JWT as FirebaseJWT;
+use Illuminate\Cache\ArrayStore;
 use Okta\JwtVerifier\Jwt;
 use Okta\JwtVerifier\Request;
 use UnexpectedValueException;
@@ -36,15 +38,34 @@ class FirebasePhpJwt implements Adaptor
      */
     private $leeway;
 
-    public function __construct(Request $request = null, int $leeway = 120)
+    public function __construct(Request $request = null, int $leeway = 120, \Psr\SimpleCache\CacheInterface $cache = null)
     {
         $this->request = $request ?: new Request();
-        $this->leeway = $leeway;
+        $this->leeway = $leeway ?: 120;
+        $this->cache = $cache ?: new \Illuminate\Cache\Repository(new ArrayStore(true));
     }
 
-    public function getKeys($jku)
+    public function clearCache(string $jku)
     {
+        $cacheKey = 'keys-' . md5($jku);
+        return $this->cache->delete($cacheKey);
+    }
+
+    /**
+     * Caching the keys in accordance with best practices: https://developer.okta.com/docs/reference/api/oidc/#best-practices
+     */
+    public function getKeys(string $jku): array
+    {
+        $cacheKey = 'keys-' . md5($jku);
+
+        $cached = $this->cache->get($cacheKey);
+        if($cached){
+            return self::parseKeySet($cached);
+        }
+
         $keys = json_decode($this->request->setUrl($jku)->get()->getBody()->getContents());
+        $this->cache->set($cacheKey, $keys, Carbon::now()->addDay());
+
         return self::parseKeySet($keys);
     }
 

@@ -17,11 +17,7 @@
 
 namespace Okta\JwtVerifier;
 
-use Http\Client\Common\PluginClient;
-use Http\Client\HttpClient;
-use Http\Discovery\HttpClientDiscovery;
-use Http\Discovery\MessageFactoryDiscovery;
-use Http\Discovery\UriFactoryDiscovery;
+use Carbon\Carbon;
 use Okta\JwtVerifier\Adaptors\Adaptor;
 use Okta\JwtVerifier\Adaptors\AutoDiscover;
 use Okta\JwtVerifier\Discovery\DiscoveryMethod;
@@ -59,6 +55,10 @@ class JwtVerifier
      */
     protected $adaptor;
 
+    protected string $jwksUri;
+
+    private Request $request;
+
     public function __construct(
         string $issuer,
         DiscoveryMethod $discovery = null,
@@ -70,15 +70,25 @@ class JwtVerifier
         $this->issuer = $issuer;
         $this->discovery = $discovery ?: new Oauth;
         $this->adaptor = $adaptor ?: AutoDiscover::getAdaptor();
-        $request = $request ?: new Request;
-        $this->wellknown = $this->issuer.$this->discovery->getWellKnown();
-        $this->metaData = json_decode($request->setUrl($this->wellknown)->get()
-            ->getBody());
+        $this->request = $request ?: new Request;
 
         $this->claimsToValidate = $claimsToValidate;
+
+        $this->jwksUri = "$issuer/v1/keys";
+
     }
 
-    public function getIssuer()
+    public function clearCache(): bool
+    {
+        return $this->adaptor->clearCache($this->jwksUri);
+    }
+
+    public function getJwksUri(): string
+    {
+        return $this->jwksUri;
+    }
+
+    public function getIssuer(): string
     {
         return $this->issuer;
     }
@@ -88,18 +98,26 @@ class JwtVerifier
         return $this->discovery;
     }
 
+    /**
+     * @deprecated you should no longer rely on this method for client metadata
+     */
     public function getMetaData()
     {
-        return $this->metaData;
+        $this->wellknown = $this->issuer.$this->discovery->getWellKnown();
+        return json_decode($this->request->setUrl($this->wellknown)->get()->getBody());
+    }
+
+    /**
+     * @return array|mixed
+     */
+    public function getKeys()
+    {
+        return $this->adaptor->getKeys($this->jwksUri);
     }
 
     public function verify($jwt)
     {
-        if($this->metaData->jwks_uri == null) {
-            throw new \DomainException("Could not access a valid JWKS_URI from the metadata.  We made a call to {$this->wellknown} endpoint, but jwks_uri was null. Please make sure you are using a custom authorization server for the jwt verifier.");
-        }
-
-        $keys = $this->adaptor->getKeys($this->metaData->jwks_uri);
+        $keys = $this->getKeys();
 
         $decoded =  $this->adaptor->decode($jwt, $keys);
 
@@ -110,12 +128,7 @@ class JwtVerifier
 
     public function verifyIdToken($jwt)
     {
-
-        if($this->metaData->jwks_uri == null) {
-            throw new \DomainException("Could not access a valid JWKS_URI from the metadata.  We made a call to {$this->wellknown} endpoint, but jwks_uri was null. Please make sure you are using a custom authorization server for the jwt verifier.");
-        }
-
-        $keys = $this->adaptor->getKeys($this->metaData->jwks_uri);
+        $keys = $this->getKeys();
 
         $decoded =  $this->adaptor->decode($jwt, $keys);
 
@@ -126,11 +139,7 @@ class JwtVerifier
 
     public function verifyAccessToken($jwt)
     {
-        if($this->metaData->jwks_uri == null) {
-            throw new \DomainException("Could not access a valid JWKS_URI from the metadata.  We made a call to {$this->wellknown} endpoint, but jwks_uri was null. Please make sure you are using a custom authorization server for the jwt verifier.");
-        }
-
-        $keys = $this->adaptor->getKeys($this->metaData->jwks_uri);
+        $keys = $this->getKeys();
 
         $decoded =  $this->adaptor->decode($jwt, $keys);
 

@@ -21,6 +21,7 @@ use Carbon\Carbon;
 use Firebase\JWT\JWT as FirebaseJWT;
 use Illuminate\Cache\ArrayStore;
 use Firebase\JWT\Key;
+use Illuminate\Cache\ArrayStore;
 use Okta\JwtVerifier\Jwt;
 use Okta\JwtVerifier\Request;
 use UnexpectedValueException;

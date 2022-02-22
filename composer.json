@@ -25,7 +25,11 @@
         "php-http/curl-client": "^2.1",
         "bretterer/iso_duration_converter": "^0.1.0",
         "ext-json": "*",
+<<<<<<< HEAD
         "illuminate/cache": "^8.83.1 || ^9.0",
+=======
+        "illuminate/cache": "^8.83.1 || ^9.0"
+>>>>>>> 9ede060 (Adding cache driver and depricating metadata)
     },
     "require-dev": {
         "phpunit/phpunit": "^9.0 ",

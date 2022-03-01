@@ -20,6 +20,7 @@ namespace Okta\JwtVerifier\Adaptors;
 use Carbon\Carbon;
 use Firebase\JWT\JWT as FirebaseJWT;
 use Illuminate\Cache\ArrayStore;
+use Firebase\JWT\Key;
 use Okta\JwtVerifier\Jwt;
 use Okta\JwtVerifier\Request;
 use UnexpectedValueException;
@@ -71,8 +72,10 @@ class FirebasePhpJwt implements Adaptor
 
     public function decode($jwt, $keys): Jwt
     {
-        FirebaseJWT::$leeway = $this->leeway;
-        $decoded = (array)FirebaseJWT::decode($jwt, $keys, ['RS256']);
+        $keys = array_map(function ($key) {
+            return new Key($key, 'RS256');
+        }, $keys);
+        $decoded = (array)FirebaseJWT::decode($jwt, $keys);
         return (new Jwt($jwt, $decoded));
     }
 

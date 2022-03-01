@@ -75,7 +75,6 @@ class JwtVerifier
         $this->claimsToValidate = $claimsToValidate;
 
         $this->jwksUri = "$issuer/v1/keys";
-
     }
 
     public function clearCache(): bool
@@ -121,7 +120,8 @@ class JwtVerifier
 
         $decoded =  $this->adaptor->decode($jwt, $keys);
 
-        $this->validateClaims($decoded->getClaims(), "access"); // This is hard coded to access token since this was the original functionality.
+        // This is hard coded to access token since this was the original functionality.
+        $this->validateClaims($decoded->getClaims(), "access");
 
         return $decoded;
     }
@@ -150,7 +150,7 @@ class JwtVerifier
 
     private function validateClaims(array $claims, string $type)
     {
-        switch($type) {
+        switch ($type) {
             case 'id':
                 $this->validateAudience($claims);
                 $this->validateNonce($claims);
@@ -164,11 +164,11 @@ class JwtVerifier
 
     private function validateNonce($claims)
     {
-        if(!isset($claims['nonce']) && $this->claimsToValidate['nonce'] == null) {
+        if (!isset($claims['nonce']) && $this->claimsToValidate['nonce'] == null) {
             return false;
         }
 
-        if($claims['nonce'] != $this->claimsToValidate['nonce']) {
+        if ($claims['nonce'] != $this->claimsToValidate['nonce']) {
             throw new \Exception('Nonce does not match what is expected. Make sure to provide the nonce with
             `setNonce()` from the JwtVerifierBuilder.');
         }
@@ -176,11 +176,11 @@ class JwtVerifier
 
     private function validateAudience($claims)
     {
-        if(!isset($claims['aud']) && $this->claimsToValidate['audience'] == null) {
+        if (!isset($claims['aud']) && $this->claimsToValidate['audience'] == null) {
             return false;
         }
 
-        if($claims['aud'] != $this->claimsToValidate['audience']) {
+        if ($claims['aud'] != $this->claimsToValidate['audience']) {
             throw new \Exception('Audience does not match what is expected. Make sure to provide the audience with
             `setAudience()` from the JwtVerifierBuilder.');
         }
@@ -188,11 +188,11 @@ class JwtVerifier
 
     private function validateClientId($claims)
     {
-        if(!isset($claims['cid']) && $this->claimsToValidate['clientId'] == null) {
+        if (!isset($claims['cid']) && $this->claimsToValidate['clientId'] == null) {
             return false;
         }
 
-        if($claims['cid'] != $this->claimsToValidate['clientId']) {
+        if ($claims['cid'] != $this->claimsToValidate['clientId']) {
             throw new \Exception('ClientId does not match what is expected. Make sure to provide the client id with
             `setClientId()` from the JwtVerifierBuilder.');
         }

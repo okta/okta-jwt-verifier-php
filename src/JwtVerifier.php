@@ -158,7 +158,6 @@ class JwtVerifier
             case 'access':
                 $this->validateAudience($claims);
                 $this->validateClientId($claims);
-                $this->validateNonce($claims);
                 break;
         }
     }

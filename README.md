@@ -30,11 +30,11 @@ composer require okta/jwt-verifier
 ```
 
 This library requires a JWT library. We currently support
-[firebase/php-jwt](https://packagist.org/packages/firebase/php-jwt). You will have to install this or create
+[firebase/php-jwt](https://packagist.org/packages/firebase/php-jwt) version 5.2. You will have to install this or create
 your own adaptor.
 
 ```bash
-composer require firebase/php-jwt
+composer require firebase/php-jwt ^5.2
 ```
 
 To create your own adaptor, just implement the `Okta/JwtVerifier/Adaptors/Adaptor` in your own class.

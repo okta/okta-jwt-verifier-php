@@ -65,6 +65,19 @@ $jwtVerifier = (new \Okta\JwtVerifier\JwtVerifierBuilder())
     ->build();
 ```
 
+### Caching
+It's strongly suggested to cache the keys to improve performance. You can pass an implementation of `\Psr\SimpleCache\CacheInterface`
+to the Adaptor constructor.
+
+For example, in laravel:
+```php
+// note: named parameters are only valid for php >= 8.0
+->setAdaptor(new \Okta\JwtVerifier\Adaptors\FirebasePhpJwt(request: null, leeway: 120, cache: app('cache')->store()))
+```
+
+If using symphony, you may need to use an adaptor:
+https://symfony.com/doc/current/components/cache/psr6_psr16_adapters.html
+
 ## Validating an Access Token
 
 After you have a `$jwtVerifier` from the above section and an `access_token` from a successful sign in, or

@@ -3,6 +3,9 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Support](https://img.shields.io/badge/support-Developer%20Forum-blue.svg)](https://devforum.okta.com/)
 
+> NOTICE: We're excited about the acquisition of Auth0 to bring you better support in PHP. This repo will be placed into security patch only mode and we will not be adding any further features. If you are looking for an API that is not supported in this library, please call the API directly. Our documentation for the supported Management APIs are located here: https://developer.okta.com/docs/reference/core-okta-api/. Please reach out to the [DevForum](https://devforum.okta.com/) for any questions.
+
+
 # Okta JWT Verifier for PHP
 
 As a result of a successful authentication by [obtaining an authorization grant from a user](https://developer.okta.com/docs/api/resources/oauth2.html#obtain-an-authorization-grant-from-a-user) or using the Okta API, you will be

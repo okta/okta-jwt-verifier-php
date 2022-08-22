@@ -67,7 +67,7 @@ class FirebasePhpJwt implements Adaptor
         }
 
         $keys = json_decode($this->request->setUrl($jku)->get()->getBody()->getContents());
-        $this->cache->set($cacheKey, $keys, Carbon::now()->addDay());
+        $this->cache->set($cacheKey, $keys, Carbon::now()->addDay()->diffInRealSeconds());
 
         return self::parseKeySet($keys);
     }

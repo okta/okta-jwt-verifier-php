@@ -80,7 +80,7 @@ For example, in laravel:
 ->setAdaptor(new \Okta\JwtVerifier\Adaptors\FirebasePhpJwt(request: null, leeway: 120, cache: app('cache')->store()))
 ```
 
-If using symphony, you may need to use an adaptor:
+If using Symfony, you may need to use an adaptor:
 https://symfony.com/doc/current/components/cache/psr6_psr16_adapters.html
 
 ## Validating an Access Token

@@ -1,5 +1,5 @@
 {
-    "name": "okta/jwt-verifier",
+    "name": "clink-aaron/jwt-verifier",
     "description": "A verifier library for working with Okta JWT's",
     "type": "library",
     "license": "Apache-2.0",

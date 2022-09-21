@@ -1,5 +1,5 @@
 {
-    "name": "okta/jwt-verifier",
+    "name": "clink-aaron/jwt-verifier",
     "description": "A verifier library for working with Okta JWT's",
     "type": "library",
     "license": "Apache-2.0",
@@ -25,7 +25,7 @@
         "php-http/curl-client": "^2.1",
         "bretterer/iso_duration_converter": "^0.1.0",
         "ext-json": "*",
-        "illuminate/cache": "^8.83.1 || ^9.0"
+        "illuminate/cache": "^6|^7|^8|^9"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.0 ",

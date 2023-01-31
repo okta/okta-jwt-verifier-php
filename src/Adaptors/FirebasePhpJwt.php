@@ -40,6 +40,11 @@ class FirebasePhpJwt implements Adaptor
      */
     private $leeway;
 
+    /**
+     * @var CacheInterface
+     */
+    private $cache;
+
     public function __construct(Request $request = null, int $leeway = 120, CacheInterface $cache = null)
     {
         $this->request = $request ?: new Request();
